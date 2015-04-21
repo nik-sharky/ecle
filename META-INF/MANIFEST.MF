@@ -1,0 +1,30 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Embed eclipse plugin
+Bundle-SymbolicName: org.ploys.eclipse.embed;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: org.ploys.eclipse.embed.ui.Activator
+Bundle-Vendor: Ploys stuff
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.core.resources,
+ org.eclipse.ui.ide,
+ org.eclipse.cdt.make.core,
+ org.eclipse.cdt.core,
+ org.eclipse.jface.text,
+ org.eclipse.wst.sse.ui,
+ org.eclipse.ui.editors,
+ org.eclipse.ui.forms,
+ org.eclipse.cdt.managedbuilder.core,
+ org.eclipse.core.databinding,
+ org.eclipse.core.databinding.beans,
+ org.eclipse.core.databinding.observable,
+ org.eclipse.core.databinding.property,
+ org.eclipse.jface.databinding,
+ com.ibm.icu
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy
+Import-Package: org.eclipse.cdt.core.settings.model.extension,
+ org.eclipse.cdt.managedbuilder.language.settings.providers
+Bundle-ClassPath: .,
+ swing2swt.jar, jssc.jar

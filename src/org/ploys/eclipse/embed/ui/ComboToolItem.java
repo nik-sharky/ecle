@@ -1,0 +1,29 @@
+package org.ploys.eclipse.embed.ui;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
+
+public class ComboToolItem extends ToolItem {
+	public ComboToolItem(ToolBar parent) {
+		super(parent, SWT.SEPARATOR);
+		Combo control = new Combo(parent, SWT.READ_ONLY);
+		setControl(control);
+		updateView();
+	}
+
+	public Combo getControl() {
+		return (Combo) super.getControl();
+	}
+
+	public void updateView() {
+		Combo control = getControl();
+		control.pack();
+		setWidth(control.getSize().x);
+	}
+	
+	protected void checkSubclass () {
+		// Force subclassing
+	}
+}

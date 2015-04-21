@@ -1,2 +1,4 @@
-# esp8266-eclipse-plugin
-ESP8266 eclipse plugin
+# eclipse-embed-plugin
+Eclipse plugin for embedded things
+
+It is draft version now
