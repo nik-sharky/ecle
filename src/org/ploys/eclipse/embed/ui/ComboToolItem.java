@@ -6,9 +6,10 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 
 public class ComboToolItem extends ToolItem {
-	public ComboToolItem(ToolBar parent) {
+	public ComboToolItem(ToolBar parent, int style, String tip) {
 		super(parent, SWT.SEPARATOR);
-		Combo control = new Combo(parent, SWT.READ_ONLY);
+		Combo control = new Combo(parent, style);
+		control.setToolTipText(tip);
 		setControl(control);
 		updateView();
 	}
@@ -22,8 +23,8 @@ public class ComboToolItem extends ToolItem {
 		control.pack();
 		setWidth(control.getSize().x);
 	}
-	
-	protected void checkSubclass () {
+
+	protected void checkSubclass() {
 		// Force subclassing
 	}
 }

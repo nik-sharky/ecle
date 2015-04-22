@@ -4,39 +4,55 @@ import javax.annotation.PreDestroy;
 
 import jssc.SerialPort;
 import jssc.SerialPortEvent;
+import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
 import jssc.SerialPortList;
 
 import org.eclipse.core.databinding.DataBindingContext;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.statushandlers.StatusAdapter;
+import org.eclipse.ui.statushandlers.StatusManager;
 import org.eclipse.wb.swt.ResourceManager;
 import org.eclipse.wb.swt.SWTResourceManager;
+import org.ploys.eclipse.embed.terminal.ui.DataRateToolItem;
+import org.ploys.eclipse.embed.terminal.ui.ParityToolItem;
 import org.ploys.eclipse.embed.ui.Activator;
 import org.ploys.eclipse.embed.ui.ComboToolItem;
+import org.ploys.eclipse.embed.ui.SpacerToolItem;
+import org.ploys.eclipse.embed.ui.UI;
 
 public class SerialTerminalView extends ViewPart {
 	private Combo eRequest;
 	private StyledText eMonitor;
 	private CLabel lStatus;
 	private CLabel fRxd, fTxd, fCts, fDcd, fDsr, fRng, fError;
+	private ToolItem fRts, fDtr;
+	
 	private Image fsiOn, fsiOff, fsiError;
-	ComboToolItem cPort;
+	ComboToolItem cPort, cDataBits, cStopBits;
+	ParityToolItem cParity;
+	DataRateToolItem cSpeed;
 
 	public SerialTerminalView() {
 		fsiOn = ResourceManager.getPluginImage(getPID(), "icons/full/eview16/state/green.png");
@@ -93,119 +109,50 @@ public class SerialTerminalView extends ViewPart {
 		aConnect.setImage(ResourceManager.getPluginImage(getPID(), "icons/full/eview16/plug-disconnect.png"));
 		aConnect.setText("Connect");
 
-		ToolItem toolItem = new ToolItem(tbPort, SWT.SEPARATOR);
-
-		Composite composite_5 = new Composite(tbPort, SWT.NONE);
-		toolItem.setControl(composite_5);
-
-		cPort = new ComboToolItem(tbPort);
-
-		ToolItem tmSpeed = new ToolItem(tbPort, SWT.SEPARATOR);
-		// tmSpeed.setWidth(64);
-
-		Combo cSpeed = new Combo(tbPort, SWT.NONE);
-		cSpeed.setToolTipText("Connection speed");
-		cSpeed.setItems(new String[] { "4800", "9600", "115200" });
-		tmSpeed.setControl(cSpeed);
-		cSpeed.select(2);
-		cSpeed.pack();
-		tmSpeed.setWidth(cSpeed.getSize().x);
-
-		ToolItem tmDatabits = new ToolItem(tbPort, SWT.SEPARATOR);
-		tmDatabits.setToolTipText("");
-		Combo cDatabits = new Combo(tbPort, SWT.READ_ONLY);
-		cDatabits.setToolTipText("Data bits");
-		cDatabits.setItems(new String[] { "8" });
-		tmDatabits.setControl(cDatabits);
-		cDatabits.select(0);
-		cDatabits.pack();
-		tmDatabits.setWidth(cDatabits.getSize().x);
-
-		ToolItem tmParity = new ToolItem(tbPort, SWT.SEPARATOR);
-		Combo cParity = new Combo(tbPort, SWT.READ_ONLY);
-		cParity.setToolTipText("Parity");
-		cParity.setItems(new String[] { "N" });
-		tmParity.setControl(cParity);
-		cParity.select(0);
-		cParity.pack();
-		tmParity.setWidth(cParity.getSize().x);
-
-		ToolItem tmStopbits = new ToolItem(tbPort, SWT.SEPARATOR);
-		Combo cStopbits = new Combo(tbPort, SWT.READ_ONLY);
-		cStopbits.setToolTipText("Stop bits");
-		cStopbits.setItems(new String[] { "1" });
-		tmStopbits.setControl(cStopbits);
-		cStopbits.select(0);
-		cStopbits.pack();
-		tmStopbits.setWidth(cStopbits.getSize().x);
+		new SpacerToolItem(tbPort, 10);
+		cPort = new ComboToolItem(tbPort, SWT.READ_ONLY, "Serial port");
+		new SpacerToolItem(tbPort, 5);
+		cSpeed = new DataRateToolItem(tbPort, SWT.NONE, "Baud rate");
+		new SpacerToolItem(tbPort, 5);
+		cDataBits = new ComboToolItem(tbPort, SWT.READ_ONLY, "Data bits");
+		new SpacerToolItem(tbPort, 5);
+		cParity = new ParityToolItem(tbPort, SWT.READ_ONLY, "Parity");
+		new SpacerToolItem(tbPort, 5);
+		cStopBits = new ComboToolItem(tbPort, SWT.READ_ONLY, "Stop bits");
 
 		Composite composite_2 = new Composite(pToolbar, SWT.NONE);
 		composite_2.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
 		composite_2.setLayout(new GridLayout(1, false));
 
-		ToolBar toolBar_2 = new ToolBar(pToolbar, SWT.FLAT | SWT.RIGHT);
+		ToolBar tbPins = new ToolBar(pToolbar, SWT.FLAT | SWT.RIGHT);
 
-		ToolItem fRts = new ToolItem(toolBar_2, SWT.CHECK);
-		fRts.setHotImage(ResourceManager.getPluginImage(getPID(), "icons/full/eview16/state/green.png"));
-		fRts.setImage(ResourceManager.getPluginImage(getPID(), "icons/full/eview16/state/gray.png"));
+		fRts = new ToolItem(tbPins, SWT.CHECK);
+		fRts.setHotImage(fsiOn);
+		fRts.setImage(fsiOff);
 		fRts.setText("RTS");
+		fRts.setToolTipText("Toggle RTS pin");
 
-		ToolItem fDtr = new ToolItem(toolBar_2, SWT.CHECK);
-		fDtr.setHotImage(ResourceManager.getPluginImage("org.ploys.eclipse.embed", "icons/full/eview16/state/green.png"));
-		fDtr.setImage(ResourceManager.getPluginImage("org.ploys.eclipse.embed", "icons/full/eview16/state/gray.png"));
+		new SpacerToolItem(tbPins, 5);
+		
+		fDtr = new ToolItem(tbPins, SWT.CHECK);
+		fDtr.setHotImage(fsiOn);
+		fDtr.setImage(fsiOff);
 		fDtr.setText("DTR");
+		fDtr.setToolTipText("Toggle DTR pin");
 
 		Composite pMonitor = new Composite(cParent, SWT.NONE);
 		pMonitor.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		GridLayout gl_pMonitor = new GridLayout(2, false);
 		pMonitor.setLayout(gl_pMonitor);
 
-		ToolBar toolBar = new ToolBar(pMonitor, SWT.FLAT | SWT.RIGHT | SWT.VERTICAL);
-		toolBar.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, true, 1, 1));
-
-		ToolItem teSave = new ToolItem(toolBar, SWT.NONE);
-		teSave.setToolTipText("Save content");
-		teSave.setImage(ResourceManager.getPluginImage("org.ploys.eclipse.embed", "icons/full/eview16/disk.png"));
-
-		ToolItem teHome = new ToolItem(toolBar, SWT.NONE);
-		teHome.setToolTipText("Scroll to home");
-		teHome.setImage(ResourceManager.getPluginImage("org.ploys.eclipse.embed", "icons/full/eview16/atop.png"));
-
-		ToolItem teEnd = new ToolItem(toolBar, SWT.NONE);
-		teEnd.setToolTipText("Scroll to end");
-		teEnd.setImage(ResourceManager.getPluginImage("org.ploys.eclipse.embed", "icons/full/eview16/abottom.png"));
-
-		ToolItem teClear = new ToolItem(toolBar, SWT.NONE);
-		teClear.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				aClear();
-			}
-		});
-		teClear.setToolTipText("Clear");
-		teClear.setImage(ResourceManager.getPluginImage("org.ploys.eclipse.embed", "icons/full/eview16/eraser.png"));
-
-		ScrolledComposite scrolledComposite = new ScrolledComposite(pMonitor, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL);
-		scrolledComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-		scrolledComposite.setExpandHorizontal(true);
-		scrolledComposite.setExpandVertical(true);
-
-		eMonitor = new StyledText(scrolledComposite, SWT.READ_ONLY);
-		eMonitor.setRightMargin(3);
-		eMonitor.setBottomMargin(3);
-		eMonitor.setTopMargin(3);
-		eMonitor.setLeftMargin(3);
-		eMonitor.setText("1\r\n2\r\n3\r\n4\r\n5\r\n6\r\n7\r\n8\r\n9\r\n10\r\n11\r\n12\r\n13\r\n14\r\n15");
-
-		scrolledComposite.setContent(eMonitor);
-		scrolledComposite.setMinSize(eMonitor.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		createMonitor(pMonitor);
 
 		ToolBar toolBar_3 = new ToolBar(pMonitor, SWT.FLAT | SWT.RIGHT);
 
 		ToolItem fDuplex = new ToolItem(toolBar_3, SWT.CHECK);
 		fDuplex.setToolTipText("Duplex mode");
-		fDuplex.setHotImage(ResourceManager.getPluginImage("org.ploys.eclipse.embed", "icons/full/eview16/monitor.png"));
-		fDuplex.setImage(ResourceManager.getPluginImage("org.ploys.eclipse.embed", "icons/full/eview16/monitor-off.png"));
+		fDuplex.setHotImage(ResourceManager.getPluginImage(getPID(), "icons/full/eview16/monitor.png"));
+		fDuplex.setImage(ResourceManager.getPluginImage(getPID(), "icons/full/eview16/monitor-off.png"));
 
 		Composite composite_1 = new Composite(pMonitor, SWT.NONE);
 		composite_1.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
@@ -240,19 +187,49 @@ public class SerialTerminalView extends ViewPart {
 		pStatus.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 
 		lStatus = new CLabel(pStatus, SWT.NONE);
-		lStatus.setFont(SWTResourceManager.getFont("Segoe UI", 9, SWT.NORMAL));
 		lStatus.setImage(ResourceManager.getPluginImage(getPID(), "icons/full/eview16/plug-disconnect.png"));
 		lStatus.setLeftMargin(2);
 		lStatus.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		lStatus.setRightMargin(5);
 		lStatus.setTopMargin(2);
 		lStatus.setBottomMargin(1);
-		lStatus.setText("COM1 8N1 115200");
+		lStatus.setText("Port: Closed");
 
 		createIndicators(pStatus);
 
 		initListeners();
 		initPort();
+	}
+
+	private void createMonitor(Composite parent) {
+		ToolBar tbMonitor = new ToolBar(parent, SWT.FLAT | SWT.RIGHT | SWT.VERTICAL);
+		tbMonitor.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, true, 1, 1));
+
+		createMonitorButton(tbMonitor, MonitorAction.SAVE, "Save content to file...", "disk.png");
+		createMonitorButton(tbMonitor, MonitorAction.HOME, "Scroll to home", "atop.png");
+		createMonitorButton(tbMonitor, MonitorAction.END, "Scroll to end", "abottom.png");
+		createMonitorButton(tbMonitor, MonitorAction.CLEAR, "Clear", "eraser.png");
+
+		eMonitor = new StyledText(parent, SWT.READ_ONLY | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI);
+		eMonitor.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+
+		eMonitor.setRightMargin(3);
+		eMonitor.setBottomMargin(3);
+		eMonitor.setTopMargin(3);
+		eMonitor.setLeftMargin(3);
+		eMonitor.setText("Embed plugin serial terminal\r\n");
+	}
+
+	private void createMonitorButton(ToolBar tb, final MonitorAction action, String tip, String ico) {
+		ToolItem teClear = new ToolItem(tb, SWT.NONE);
+		teClear.setToolTipText(tip);
+		teClear.setImage(ResourceManager.getPluginImage(getPID(), "icons/full/eview16/" + ico));
+		teClear.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				doMonitorAction(action);
+			}
+		});
 	}
 
 	protected void createIndicators(Composite parent) {
@@ -290,10 +267,19 @@ public class SerialTerminalView extends ViewPart {
 	protected void initListeners() {
 		aConnect.addSelectionListener(new SelectionAdapter() {
 			@Override
-			public void widgetSelected(SelectionEvent e) {
+			public void widgetSelected(SelectionEvent ev) {
+				ToolItem button = ((ToolItem) ev.widget);
+				try {
+					if (button.getSelection()) {
+						connect();
+					} else {
+						disconnect();
+					}
+				} catch (Exception e) {
+					UI.errorDialog(StatusManager.SHOW, "Can't connect", e);					
+				}
 			}
 		});
-
 	}
 
 	protected void initPort() {
@@ -302,47 +288,139 @@ public class SerialTerminalView extends ViewPart {
 		cp.setItems(ports);
 		cp.select(0);
 		cPort.updateView();
-		cPort.setToolTipText("Serial port");
+		cSpeed.select(115200);		
+	}
 
-		// serialPort = new SerialPort("COM1");
+	protected void connect() throws SerialPortException {
+		disconnect();
+
+		serialPort = new SerialPort(cPort.getControl().getText());
+		serialPort.openPort();
+		serialPort.setParams(cSpeed.getValue(), dataBits, stopBits, cParity.getValue(), false, false);// ,
+		// setRTS,
+		// setDTR);
+
+		serialPort.addEventListener(serialListener);
+	}
+
+	protected void disconnect() throws SerialPortException {
+		if (serialPort != null) {
+			if (serialPort.isOpened()) {
+				serialPort.removeEventListener();
+				serialPort.closePort();
+			}
+		}
+	}
+
+	SerialPortEventListener serialListener = new SerialPortEventListener() {
+		@Override
+		public void serialEvent(SerialPortEvent e) {
+			System.out.println(e);
+			switch (e.getEventType()) {
+			case SerialPortEvent.CTS:
+			case SerialPortEvent.RLSD:
+				updateIndicator(fDcd, e.getEventValue() == 1);
+				break;
+			case SerialPortEvent.DSR:
+				updateIndicator(fDsr, e.getEventValue() == 1);
+				break;
+			case SerialPortEvent.RING:
+				updateIndicator(fRng, e.getEventValue() == 1);
+				break;
+			case SerialPortEvent.ERR:
+				break;
+			case SerialPortEvent.BREAK:
+				break;
+			case SerialPortEvent.RXCHAR:
+			case SerialPortEvent.RXFLAG:
+				readData(e.getEventValue());
+				break;
+			case SerialPortEvent.TXEMPTY:
+				break;
+			}
+		}
+
+	};
+
+	private void readData(int len) {
+		try {
+			UI.runAsync(new Runnable() {
+				public void run() {
+					updateIndicator(fRxd, true);
+				}
+			});
+			final String data = serialPort.readString(len);
+			UI.runAsync(new Runnable() {
+				public void run() {
+					eMonitor.append(data);
+					eMonitor.append(" ");
+					updateIndicator(fRxd, false);
+				}
+			});
+
+		} catch (SerialPortException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		// TODO Auto-generated method stub
+
 	}
 
 	// endregion
 
-	
 	private SerialPort serialPort;
 	private ToolItem aConnect;
-
-	void updateSignal(CLabel lbl, boolean state) {
-		if (fsiOff == null)
-			fsiOff = ResourceManager.getPluginImage(getPID(), "icons/full/eview16/state/gray.png");
-
-		if (fsiOn == null)
-			fsiOn = ResourceManager.getPluginImage(getPID(), "icons/full/eview16/state/green.png");
-
-		lbl.setImage(state ? fsiOn : fsiOff);
-	}
-
-	void updateSignals(SerialPortEvent e) {
-
-		updateSignal(fRxd, e.isRXFLAG());
-		updateSignal(fTxd, !e.isTXEMPTY());
-
-		// updateSignal(fCts, port.isCTS());
-
-		updateSignal(fDcd, e.isRLSD());
-
-		updateSignal(fDsr, e.isDSR());
-		updateSignal(fRng, e.isRING());
-	}
-
 	private String portName;
 	private int baudRate = SerialPort.BAUDRATE_9600;
 	private int dataBits = SerialPort.DATABITS_8;
 	private int stopBits = SerialPort.STOPBITS_1;
 	private int parity = SerialPort.PARITY_NONE;
 
-	void aClear() {
-		eMonitor.setText("");
+	boolean isPortActive() {
+		return serialPort != null && serialPort.isOpened();
+	}
+
+	void updateIndicator(CLabel indicator, boolean state) {
+		indicator.setImage(state ? fsiOn : fsiOff);
+		indicator.update();
+	}
+
+	void updateIndicators() throws SerialPortException {
+		if (!isPortActive()) {
+			updateIndicator(fCts, false);
+			updateIndicator(fDcd, false);
+			updateIndicator(fDsr, false);
+			updateIndicator(fRng, false);
+			return;
+		}
+
+		updateIndicator(fCts, serialPort.isCTS());
+		updateIndicator(fDcd, serialPort.isRLSD());
+		updateIndicator(fDsr, serialPort.isDSR());
+		updateIndicator(fRng, serialPort.isRING());
+
+		// updateSignal(fRxd, e.isRXFLAG());
+		// updateSignal(fTxd, !e.isTXEMPTY());
+	}
+
+	enum MonitorAction {
+		CLEAR, HOME, END, SAVE
+	}
+
+	void doMonitorAction(MonitorAction action) {
+		switch (action) {
+		case CLEAR:
+			eMonitor.setText("");
+			break;
+		case HOME:
+			eMonitor.setTopIndex(0);
+			break;
+		case END:
+			eMonitor.setTopIndex(eMonitor.getLineCount() - 1);
+			break;
+		case SAVE:
+			break;
+		}
+
 	}
 }
