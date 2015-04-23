@@ -35,6 +35,7 @@ import org.eclipse.ui.part.MultiPageEditorSite;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.wb.swt.ResourceManager;
 import org.eclipse.wst.sse.ui.StructuredTextEditor;
+import org.ploys.eclipse.embed.ui.Activator;
 
 /**
  * An example showing how to create a multi-page editor. This example has 3
@@ -46,7 +47,8 @@ import org.eclipse.wst.sse.ui.StructuredTextEditor;
  * </ul>
  */
 public class MBDEditor extends FormEditor implements IResourceChangeListener {
-//	public class MultiPageEditor extends MultiPageEditorPart implements IResourceChangeListener {
+	// public class MultiPageEditor extends MultiPageEditorPart implements
+	// IResourceChangeListener {
 
 	/** The text editor used in page 0. */
 	private StructuredTextEditor editor;
@@ -56,9 +58,9 @@ public class MBDEditor extends FormEditor implements IResourceChangeListener {
 	 */
 	public MBDEditor() {
 		super();
-		
+
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
-		//MultiPageEditor.createSite(this);
+		// MultiPageEditor.createSite(this);
 	}
 
 	/**
@@ -105,16 +107,17 @@ public class MBDEditor extends FormEditor implements IResourceChangeListener {
 	/**
 	 * Creates page 2 of the multi-page editor, which shows the sorted text.
 	 */
-	void createSettings() {
+	void createOverviewPage() {
 		Composite composite = new Composite(getContainer(), SWT.NONE);
 		FillLayout layout = new FillLayout();
-		composite.setLayout(layout);		
+		composite.setLayout(layout);
 
-		MBDEMainPage page = new MBDEMainPage(this, "settings","Embedded project");
+		MBDEMainPage page = new MBDEMainPage(this, "settings", "Embedded project");
 		int index;
 		try {
 			index = addPage(page);
-			setPageText(index, "Preview");
+			setPageText(index, "Overview");
+			setPageImage(index, ResourceManager.getPluginImage(Activator.PLUGIN_ID, "/icons/full/eview16/chip/chip.png"));
 		} catch (PartInitException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -122,15 +125,16 @@ public class MBDEditor extends FormEditor implements IResourceChangeListener {
 	}
 
 	int srcPage = 1;
+
 	/**
 	 * Creates the pages of the multi-page editor.
 	 */
-	protected void createPages() {				
-//		  Object form = getToolkit().createScrolledForm(parent);
-		//  setContentDescription("kkk");
-		  //form.setText("Hello, Eclipse Forms");
-		  
-		createSettings();
+	protected void createPages() {
+		// Object form = getToolkit().createScrolledForm(parent);
+		// setContentDescription("kkk");
+		// form.setText("Hello, Eclipse Forms");
+
+		createOverviewPage();
 		createPageSource();
 	}
 
@@ -193,9 +197,9 @@ public class MBDEditor extends FormEditor implements IResourceChangeListener {
 	 */
 	protected void pageChange(int newPageIndex) {
 		super.pageChange(newPageIndex);
-		//if (newPageIndex == 2) {
-		//	sortWords();
-		//}
+		// if (newPageIndex == 2) {
+		// sortWords();
+		// }
 	}
 
 	/**
@@ -222,15 +226,12 @@ public class MBDEditor extends FormEditor implements IResourceChangeListener {
 	 */
 	void setFont() {
 		/*
-		FontDialog fontDialog = new FontDialog(getSite().getShell());
-		fontDialog.setFontList(text.getFont().getFontData());
-		FontData fontData = fontDialog.open();
-		if (fontData != null) {
-			if (font != null)
-				font.dispose();
-			font = new Font(text.getDisplay(), fontData);
-			text.setFont(font);
-		}*/
+		 * FontDialog fontDialog = new FontDialog(getSite().getShell());
+		 * fontDialog.setFontList(text.getFont().getFontData()); FontData
+		 * fontData = fontDialog.open(); if (fontData != null) { if (font !=
+		 * null) font.dispose(); font = new Font(text.getDisplay(), fontData);
+		 * text.setFont(font); }
+		 */
 	}
 
 	/**
@@ -251,9 +252,9 @@ public class MBDEditor extends FormEditor implements IResourceChangeListener {
 			displayText.write(((String) editorWords.get(i)));
 			displayText.write(System.getProperty("line.separator"));
 		}
-		//text.setText(displayText.toString());
+		// text.setText(displayText.toString());
 	}
-	
+
 	private static class PDEMultiPageEditorSite extends MultiPageEditorSite {
 		public PDEMultiPageEditorSite(MultiPageEditorPart multiPageEditor, IEditorPart editor) {
 			super(multiPageEditor, editor);
@@ -261,9 +262,9 @@ public class MBDEditor extends FormEditor implements IResourceChangeListener {
 
 		@Override
 		public IEditorActionBarContributor getActionBarContributor() {
-		//	PDEFormEditor editor = (PDEFormEditor) getMultiPageEditor();
-			//PDEFormEditorContributor contributor = editor.getContributor();
-			return null;//contributor.getSourceContributor();
+			// PDEFormEditor editor = (PDEFormEditor) getMultiPageEditor();
+			// PDEFormEditorContributor contributor = editor.getContributor();
+			return null;// contributor.getSourceContributor();
 		}
 
 		@Override
@@ -275,7 +276,7 @@ public class MBDEditor extends FormEditor implements IResourceChangeListener {
 	@Override
 	protected void addPages() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

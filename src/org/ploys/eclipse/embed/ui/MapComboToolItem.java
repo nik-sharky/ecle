@@ -52,6 +52,11 @@ public class MapComboToolItem<V> extends ComboToolItem {
 		return valMap.get(idx);
 	}
 
+	public String getTitle() {
+		V val = getValue();
+		return val == null ? null : convert(val);
+	}
+
 	public void select(V value) {
 		Combo cp = getControl();
 
