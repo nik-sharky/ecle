@@ -7,17 +7,15 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.ToolBar;
 import org.ploys.eclipse.embed.common.Converter;
-import org.ploys.eclipse.embed.terminal.SerialKeys;
 import org.ploys.eclipse.embed.ui.ComboToolItem;
 
 public class MapComboToolItem<V> extends ComboToolItem {
-	Converter<V, String> converter;
-	Map<V, Integer> idxMap = new HashMap<>();
-	Map<Integer, V> valMap = new HashMap<>();
+	private Converter<V, String> converter = new Converter.ToString<V>();
+	private Map<V, Integer> idxMap = new HashMap<>();
+	private Map<Integer, V> valMap = new HashMap<>();
 
-	public MapComboToolItem(ToolBar parent, int style, Converter<V, String> conv, String tip) {
+	public MapComboToolItem(ToolBar parent, int style, String tip) {
 		super(parent, style, tip);
-		converter = conv;
 	}
 
 	public void initList(V... items) {
@@ -38,11 +36,12 @@ public class MapComboToolItem<V> extends ComboToolItem {
 		updateView();
 	}
 
-	protected String convert(V data) {
-		if (converter != null)
-			return converter.convert(data);
+	public void setConverter(Converter<V, String> conv) {
+		converter = conv;
+	}
 
-		return String.valueOf(data);
+	protected String convert(V data) {
+		return converter.convert(data);
 	}
 
 	public V getValue() {
@@ -63,8 +62,8 @@ public class MapComboToolItem<V> extends ComboToolItem {
 		}
 
 		// is editable
-		if (SWT.READ_ONLY != (cp.getStyle() & SWT.READ_ONLY)) {
-			cp.setText(String.valueOf(value));
+		if (!isReadOnly()) {
+			cp.setText(convert(value));
 		}
 	}
 }

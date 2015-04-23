@@ -8,35 +8,25 @@ import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
 import jssc.SerialPortList;
 
-import org.eclipse.core.databinding.DataBindingContext;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
-import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.part.ViewPart;
-import org.eclipse.ui.statushandlers.StatusAdapter;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.eclipse.wb.swt.ResourceManager;
 import org.eclipse.wb.swt.SWTResourceManager;
-import org.ploys.eclipse.embed.terminal.ui.DataRateToolItem;
-import org.ploys.eclipse.embed.terminal.ui.ParityToolItem;
+import org.ploys.eclipse.embed.terminal.ui.PortTools;
 import org.ploys.eclipse.embed.ui.Activator;
 import org.ploys.eclipse.embed.ui.ComboToolItem;
 import org.ploys.eclipse.embed.ui.SpacerToolItem;
@@ -48,11 +38,11 @@ public class SerialTerminalView extends ViewPart {
 	private CLabel lStatus;
 	private CLabel fRxd, fTxd, fCts, fDcd, fDsr, fRng, fError;
 	private ToolItem fRts, fDtr;
-	
+
 	private Image fsiOn, fsiOff, fsiError;
-	ComboToolItem cPort, cDataBits, cStopBits;
-	ParityToolItem cParity;
-	DataRateToolItem cSpeed;
+	private ComboToolItem cPort, cDataBits, cStopBits;
+	private PortTools.Parity cParity;
+	private PortTools.DataRate cSpeed;
 
 	public SerialTerminalView() {
 		fsiOn = ResourceManager.getPluginImage(getPID(), "icons/full/eview16/state/green.png");
@@ -77,7 +67,7 @@ public class SerialTerminalView extends ViewPart {
 	}
 
 	public String getPID() {
-		return "org.ploys.eclipse.embed";// Activator.PLUGIN_ID;
+		return Activator.PLUGIN_ID;
 	}
 
 	/**
@@ -112,13 +102,13 @@ public class SerialTerminalView extends ViewPart {
 		new SpacerToolItem(tbPort, 10);
 		cPort = new ComboToolItem(tbPort, SWT.READ_ONLY, "Serial port");
 		new SpacerToolItem(tbPort, 5);
-		cSpeed = new DataRateToolItem(tbPort, SWT.NONE, "Baud rate");
+		cSpeed = new PortTools.DataRate(tbPort, SWT.NONE, "Baud rate");
 		new SpacerToolItem(tbPort, 5);
-		cDataBits = new ComboToolItem(tbPort, SWT.READ_ONLY, "Data bits");
+		cDataBits = new PortTools.DataBits(tbPort, SWT.READ_ONLY, "Data bits");
 		new SpacerToolItem(tbPort, 5);
-		cParity = new ParityToolItem(tbPort, SWT.READ_ONLY, "Parity");
+		cParity = new PortTools.Parity(tbPort, SWT.READ_ONLY, "Parity");
 		new SpacerToolItem(tbPort, 5);
-		cStopBits = new ComboToolItem(tbPort, SWT.READ_ONLY, "Stop bits");
+		cStopBits = new PortTools.StopBits(tbPort, SWT.READ_ONLY, "Stop bits");
 
 		Composite composite_2 = new Composite(pToolbar, SWT.NONE);
 		composite_2.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
@@ -133,7 +123,7 @@ public class SerialTerminalView extends ViewPart {
 		fRts.setToolTipText("Toggle RTS pin");
 
 		new SpacerToolItem(tbPins, 5);
-		
+
 		fDtr = new ToolItem(tbPins, SWT.CHECK);
 		fDtr.setHotImage(fsiOn);
 		fDtr.setImage(fsiOff);
@@ -276,7 +266,7 @@ public class SerialTerminalView extends ViewPart {
 						disconnect();
 					}
 				} catch (Exception e) {
-					UI.errorDialog(StatusManager.SHOW, "Can't connect", e);					
+					UI.errorDialog(StatusManager.SHOW, "Can't connect", e);
 				}
 			}
 		});
@@ -288,7 +278,7 @@ public class SerialTerminalView extends ViewPart {
 		cp.setItems(ports);
 		cp.select(0);
 		cPort.updateView();
-		cSpeed.select(115200);		
+		cSpeed.select(115200);
 	}
 
 	protected void connect() throws SerialPortException {

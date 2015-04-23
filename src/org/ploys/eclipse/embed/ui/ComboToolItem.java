@@ -24,6 +24,10 @@ public class ComboToolItem extends ToolItem {
 		setWidth(control.getSize().x);
 	}
 
+	public boolean isReadOnly() {
+		return SWT.READ_ONLY == (getControl().getStyle() & SWT.READ_ONLY);
+	}
+
 	protected void checkSubclass() {
 		// Force subclassing
 	}
