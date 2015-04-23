@@ -27,4 +27,4 @@ Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.cdt.core.settings.model.extension,
  org.eclipse.cdt.managedbuilder.language.settings.providers
 Bundle-ClassPath: .,
- swing2swt.jar, jssc.jar
+ libs/swing2swt.jar, libs/jssc.jar
