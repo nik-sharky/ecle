@@ -1,4 +1,4 @@
-package org.ploys.eclipse.embed.core.editors;
+package org.ploys.eclipse.embed.editors;
 
 import org.eclipse.jface.action.*;
 import org.eclipse.jface.dialogs.MessageDialog;

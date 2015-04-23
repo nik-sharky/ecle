@@ -1,4 +1,4 @@
-package org.ploys.eclipse.embed.core.editors;
+package org.ploys.eclipse.embed.editors;
 
 import java.io.StringWriter;
 import java.text.Collator;
@@ -110,7 +110,7 @@ public class MBDEditor extends FormEditor implements IResourceChangeListener {
 		FillLayout layout = new FillLayout();
 		composite.setLayout(layout);		
 
-		MBDESettingsPage page = new MBDESettingsPage(this, "settings","Embedded project");
+		MBDEMainPage page = new MBDEMainPage(this, "settings","Embedded project");
 		int index;
 		try {
 			index = addPage(page);

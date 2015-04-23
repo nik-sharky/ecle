@@ -1,4 +1,7 @@
-package org.ploys.eclipse.embed.core.editors;
+package org.ploys.eclipse.embed.editors;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.cdtvariables.ICdtVariableManager;
@@ -13,6 +16,8 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.editor.FormEditor;
 import org.eclipse.ui.forms.editor.FormPage;
@@ -21,6 +26,10 @@ import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.wb.swt.ResourceManager;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.forms.widgets.ColumnLayout;
+import org.eclipse.swt.events.ControlEvent;
+import org.eclipse.swt.events.ControlListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.SWT;
@@ -34,14 +43,14 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Button;
 
-public class MBDESettingsPage extends FormPage {
+public class MBDEMainPage extends FormPage {
 
 	/**
 	 * Create the form page.
 	 * @param id
 	 * @param title
 	 */
-	public MBDESettingsPage(String id, String title) {
+	public MBDEMainPage(String id, String title) {
 		super(id, title);
 	}
 
@@ -54,7 +63,7 @@ public class MBDESettingsPage extends FormPage {
 	 * @wbp.eval.method.parameter id "Some id"
 	 * @wbp.eval.method.parameter title "Some title"
 	 */
-	public MBDESettingsPage(FormEditor editor, String id, String title) {
+	public MBDEMainPage(FormEditor editor, String id, String title) {
 		super(editor, id, title);
 	}
 
@@ -111,7 +120,27 @@ public class MBDESettingsPage extends FormPage {
 		combo.select(0);
 		
 		Button btnRescan = managedForm.getToolkit().createButton(composite, "rescan", SWT.NONE);
-		
+		btnRescan.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				//IWorkbenchSupport.createBrowser("myId").openURL(url);
+				try {
+					PlatformUI.getWorkbench().getBrowserSupport().createBrowser("myId").openURL(new URL("http://esp8266.ru"));
+				} catch (PartInitException | MalformedURLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} 
+				
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 		Label lblSpeed = managedForm.getToolkit().createLabel(composite, "Speed", SWT.NONE);
 		new Label(composite, SWT.NONE);
 		

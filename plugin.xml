@@ -176,12 +176,12 @@
    <extension
          point="org.eclipse.ui.editors">
       <editor
-            class="org.ploys.eclipse.embed.core.editors.MBDEditor"
-            contributorClass="org.ploys.eclipse.embed.core.editors.MBDEditorContributor"
+            class="org.ploys.eclipse.embed.editors.MBDEditor"
+            contributorClass="org.ploys.eclipse.embed.editors.MBDEditorContributor"
             default="true"
             extensions="mbd"
             icon="icons/full/eview16/chip/cpu.png"
-            id="org.ploys.eclipse.embed.core.editors.MultiPageEditor"
+            id="org.ploys.eclipse.embed.editors.MBDEditor"
             name="Embed config editor">
              <contentTypeBinding  
                contentTypeId="org.ploys.eclipse.embed.content.mbd">  
