@@ -1,10 +1,12 @@
-# eclipse-embed-plugin
-Eclipse plugin for embedded things
+# Eclipse embed plugin
+### Eclipse plugin for embedded things
 
-It is draft version now
+It is draft version now, currently work on build-flow automation for Sming and other ESP8266 stuff.
 
 ## Serial terminal 
-### basic functionality finished
+### One of embed plugin tool
+
+Basic functionality finished.
 Ports list automatically updates on ports combo click, simple click on combo after connect device.
 
 ![Actual look](https://cloud.githubusercontent.com/assets/11439226/7324394/cf78312e-eabe-11e4-91e3-239914714e23.png "Actual look")
