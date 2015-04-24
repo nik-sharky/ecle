@@ -7,7 +7,7 @@ It is draft version now
 ### basic functionality finished
 Ports list automatically updates on ports combo click, simple click on combo after connect device.
 
-[![Actual look](https://github.com/ploys/eclipse-embed-plugin/tree/master/docs/shots/serial-150424.png)
+![Actual look](https://github.com/ploys/eclipse-embed-plugin/tree/master/docs/shots/serial-150424.png "Actual look")
 
 ### TODO:
 * Add history to send 
