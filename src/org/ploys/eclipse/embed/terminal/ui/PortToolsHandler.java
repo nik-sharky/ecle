@@ -1,10 +1,14 @@
 package org.ploys.eclipse.embed.terminal.ui;
 
+import org.ploys.eclipse.embed.terminal.SerialPin;
+
 public interface PortToolsHandler {
-	void onConnect(boolean state);
+	boolean onConnect(boolean state);
 
 	void onPortChange();
 
-	void onParamChange();
+	void onParamsChange();
+	
+	void onPinChange(SerialPin pin, boolean state);
 
 }

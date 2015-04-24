@@ -13,21 +13,18 @@ import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.wb.swt.SWTResourceManager;
 import org.ploys.eclipse.embed.common.State;
-import org.ploys.eclipse.embed.terminal.ui.PortStatus.Led;
+import org.ploys.eclipse.embed.terminal.SerialPin;
 import org.ploys.eclipse.embed.ui.Icons;
 
 public class PortStatus {
-	public enum Led {
-		RXD, TXD, CTS, DCD, DSR, RNG, BREAK, ERROR;
-	}
-
 	private CLabel lStatus;
 
-	private Map<Led, CLabel> leds = new EnumMap<>(Led.class);
+	private Map<SerialPin, CLabel> leds = new EnumMap<>(SerialPin.class);
 
-	public void setLed(Led led, State state) {
+	public void setLed(SerialPin led, State state) {
 		CLabel lc = getElement(led);
 		if (lc == null)
 			return;
@@ -36,7 +33,7 @@ public class PortStatus {
 		lc.update();
 	}
 
-	public void setLed(Led led, boolean state) {
+	public void setLed(SerialPin led, boolean state) {
 		State onState = State.ON;
 		switch (led) {
 		case BREAK:
@@ -50,22 +47,23 @@ public class PortStatus {
 	}
 
 	public void setBreak(boolean brk) {
-		setLed(Led.BREAK, brk);
+		setLed(SerialPin.BREAK, brk);
 	}
 
 	public void setError(int error) {
-		setLed(Led.ERROR, error != 0);
+		setLed(SerialPin.ERROR, error != 0);
 	}
 
 	public void resetLeds() {
-		for (Led led : Led.values())
+		for (SerialPin led : SerialPin.statusValues())
 			setLed(led, State.OFF);
 	}
 
-	public void setPortStatus(String str) {
+	public void setPortStatus(String str, boolean connected) {
 		lStatus.setText(str);
+		lStatus.setImage(connected ? Icons.state(State.ON) : Icons.ico("plug-disconnect"));
 	}
-	
+
 	/**
 	 * Set line status. Lines status is sent as 0 - OFF and 1 - ON
 	 *
@@ -81,13 +79,16 @@ public class PortStatus {
 			return;
 		}
 
-		setLed(Led.CTS, status[0] == 1);
-		setLed(Led.DSR, status[1] == 1);
-		setLed(Led.RNG, status[2] == 1);
-		setLed(Led.DCD, status[3] == 1);
+		setLed(SerialPin.CTS, status[0] == 1);
+		setLed(SerialPin.DSR, status[1] == 1);
+		setLed(SerialPin.RNG, status[2] == 1);
+		setLed(SerialPin.DCD, status[3] == 1);
 	}
 
 	public void createUI(Composite cParent) {
+		Label spcStatus = new Label(cParent, SWT.SEPARATOR | SWT.HORIZONTAL | SWT.SHADOW_IN);
+		spcStatus.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+
 		Composite pStatus = new Composite(cParent, SWT.NO_FOCUS);
 		pStatus.setBackground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_BACKGROUND));
 		GridLayout gl_pStatus = new GridLayout(4, false);
@@ -99,13 +100,13 @@ public class PortStatus {
 		pStatus.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 
 		lStatus = new CLabel(pStatus, SWT.NONE);
-		lStatus.setImage(Icons.ico("plug-disconnect"));
-		lStatus.setLeftMargin(2);
+		lStatus.setLeftMargin(3);
 		lStatus.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		lStatus.setRightMargin(5);
 		lStatus.setTopMargin(2);
 		lStatus.setBottomMargin(1);
-		lStatus.setText("Port: Closed");
+
+		setPortStatus("Port closed", false);
 
 		createLeds(pStatus);
 	}
@@ -116,25 +117,25 @@ public class PortStatus {
 		gl_pSigstate.marginHeight = 0;
 		pSigstate.setLayout(gl_pSigstate);
 
-		createLed(pSigstate, Led.RXD);
-		createLed(pSigstate, Led.TXD);
+		createLed(pSigstate, SerialPin.RXD);
+		createLed(pSigstate, SerialPin.TXD);
 
-		createLed(pSigstate, Led.CTS);
-		createLed(pSigstate, Led.DCD);
-		createLed(pSigstate, Led.DSR);
-		createLed(pSigstate, Led.RNG);
+		createLed(pSigstate, SerialPin.CTS);
+		createLed(pSigstate, SerialPin.DCD);
+		createLed(pSigstate, SerialPin.DSR);
+		createLed(pSigstate, SerialPin.RNG);
 
-		CLabel led = createLed(parent, Led.BREAK);
+		CLabel led = createLed(parent, SerialPin.BREAK);
 		led.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		led.setLeftMargin(20);
 
-		led = createLed(parent, Led.ERROR);
+		led = createLed(parent, SerialPin.ERROR);
 		led.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		led.setRightMargin(2);
 		led.setLeftMargin(10);
 	}
 
-	protected CLabel createLed(Composite parent, Led led) {
+	protected CLabel createLed(Composite parent, SerialPin led) {
 		CLabel element = new CLabel(parent, SWT.NONE);
 		element.setTopMargin(1);
 		element.setRightMargin(0);
@@ -147,7 +148,7 @@ public class PortStatus {
 		return element;
 	}
 
-	private CLabel getElement(Led led) {
+	private CLabel getElement(SerialPin led) {
 		return leds.get(led);
 	}
 }

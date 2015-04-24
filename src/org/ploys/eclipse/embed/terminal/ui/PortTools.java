@@ -2,10 +2,22 @@ package org.ploys.eclipse.embed.terminal.ui;
 
 import jssc.SerialPort;
 import jssc.SerialPortException;
+import jssc.SerialPortList;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.FocusAdapter;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
+import org.eclipse.swt.events.MenuDetectEvent;
+import org.eclipse.swt.events.MenuDetectListener;
+import org.eclipse.swt.events.MenuEvent;
+import org.eclipse.swt.events.MenuListener;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
@@ -15,6 +27,7 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.ploys.eclipse.embed.common.Converter;
 import org.ploys.eclipse.embed.common.State;
+import org.ploys.eclipse.embed.terminal.SerialPin;
 import org.ploys.eclipse.embed.ui.ComboToolItem;
 import org.ploys.eclipse.embed.ui.Icons;
 import org.ploys.eclipse.embed.ui.MapComboToolItem;
@@ -97,14 +110,77 @@ public class PortTools {
 			@Override
 			public void widgetSelected(SelectionEvent ev) {
 				ToolItem button = ((ToolItem) ev.widget);
-				handler.onConnect(button.getSelection());
+				boolean result = handler.onConnect(button.getSelection());
+				button.setSelection(result);
 			}
 		});
+
+		cPort.getControl().addFocusListener(new FocusAdapter() {			
+			@Override
+			public void focusGained(FocusEvent e) {
+				cPort.refreshList();
+			}
+		});
+		
+		
+		cPort.getControl().addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseDown(MouseEvent e) {
+				cPort.refreshList();
+			}
+		});
+		
+		fRts.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent ev) {
+				ToolItem button = ((ToolItem) ev.widget);
+				handler.onPinChange(SerialPin.RTS, button.getSelection());
+			}
+		});
+
+		fDtr.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent ev) {
+				ToolItem button = ((ToolItem) ev.widget);
+				handler.onPinChange(SerialPin.DTR, button.getSelection());
+			}
+		});
+
+		SelectionAdapter paramListener = new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent ev) {
+				handler.onParamsChange();
+			}
+		};
+		
+		cSpeed.addSelectionListener(paramListener);
+		cParity.addSelectionListener(paramListener);
+		cDataBits.addSelectionListener(paramListener);
+		cStopBits.addSelectionListener(paramListener);
 	}
 
-	public static class Port extends ComboToolItem {
+	public static class Port extends MapComboToolItem<String> {
 		public Port(ToolBar parent, int style, String tip) {
 			super(parent, style, tip);
+			refreshList();
+		}
+
+		public void refreshList() {
+			String val = getValue();
+			Combo cb = getControl();
+			initList(SerialPortList.getPortNames());
+
+			if (val != null) {
+				if (containsValue(val))
+					select(val);
+				else
+					cb.select(0);
+			} else {
+				cb.select(0);
+			}
+
+			cb.setVisibleItemCount(20);
+			updateView();
 		}
 	}
 
@@ -115,6 +191,8 @@ public class PortTools {
 			super(parent, style, tip);
 			initList(dataRates);
 			select(DEFAULT);
+
+			// TODO add verifyListener
 		}
 
 		public Integer getValue() {

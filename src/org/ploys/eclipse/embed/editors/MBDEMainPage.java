@@ -80,78 +80,36 @@ public class MBDEMainPage extends FormPage {
 		Composite body = form.getBody();
 		toolkit.decorateFormHeading(form.getForm());
 		toolkit.paintBordersFor(body);
-		managedForm.getForm().getBody().setLayout(new GridLayout(2, true));
+		managedForm.getForm().getBody().setLayout(new GridLayout(2, false));
 		
-		Section sctnNewSection = managedForm.getToolkit().createSection(managedForm.getForm().getBody(), Section.TWISTIE | Section.TITLE_BAR);
-		sctnNewSection.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
-		managedForm.getToolkit().paintBordersFor(sctnNewSection);
-		sctnNewSection.setText("Build settings");
-		sctnNewSection.setExpanded(true);
-		
-		Section sctnHelpItems = managedForm.getToolkit().createSection(managedForm.getForm().getBody(), Section.TWISTIE | Section.TITLE_BAR);
-		sctnHelpItems.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
-		managedForm.getToolkit().paintBordersFor(sctnHelpItems);
-		sctnHelpItems.setText("Related info");
-		sctnHelpItems.setExpanded(true);
-		
-		Hyperlink hprlnkEspForum = managedForm.getToolkit().createHyperlink(sctnHelpItems, "ESP8266 forum", SWT.NONE);
-		managedForm.getToolkit().paintBordersFor(hprlnkEspForum);
-		sctnHelpItems.setClient(hprlnkEspForum);
-		
-		Section sctnSerialSettings = managedForm.getToolkit().createSection(managedForm.getForm().getBody(), Section.TWISTIE | Section.TITLE_BAR);
-		sctnSerialSettings.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
-		managedForm.getToolkit().paintBordersFor(sctnSerialSettings);
-		sctnSerialSettings.setText("Serial settings");
-		sctnSerialSettings.setExpanded(true);
-		
-		Composite composite = managedForm.getToolkit().createComposite(sctnSerialSettings, SWT.NONE);
+		Composite composite = managedForm.getToolkit().createComposite(managedForm.getForm().getBody(), SWT.NONE);
+		composite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
 		managedForm.getToolkit().paintBordersFor(composite);
-		sctnSerialSettings.setClient(composite);
-		composite.setLayout(new GridLayout(4, false));
+		composite.setLayout(new GridLayout(1, false));
 		
-		Label lblPort = managedForm.getToolkit().createLabel(composite, "Port", SWT.NONE);
-		new Label(composite, SWT.NONE);
+		Section section = managedForm.getToolkit().createSection(composite, Section.TWISTIE | Section.TITLE_BAR);
+		section.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		managedForm.getToolkit().paintBordersFor(section);
+		section.setText("Build settings");
+		section.setExpanded(true);
 		
-		Combo combo = new Combo(composite, SWT.NONE);
-		combo.setItems(new String[] {"COM1", "COM2", "COM3"});
-		combo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
-		managedForm.getToolkit().adapt(combo);
-		managedForm.getToolkit().paintBordersFor(combo);
-		combo.select(0);
+		Section section_1 = managedForm.getToolkit().createSection(composite, Section.TWISTIE | Section.TITLE_BAR);
+		section_1.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		section_1.setBounds(0, 0, 98, 21);
+		managedForm.getToolkit().paintBordersFor(section_1);
+		section_1.setText("Serial settings");
+		section_1.setExpanded(true);
 		
-		Button btnRescan = managedForm.getToolkit().createButton(composite, "rescan", SWT.NONE);
-		btnRescan.addSelectionListener(new SelectionListener() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				//IWorkbenchSupport.createBrowser("myId").openURL(url);
-				try {
-					PlatformUI.getWorkbench().getBrowserSupport().createBrowser("myId").openURL(new URL("http://esp8266.ru"));
-				} catch (PartInitException | MalformedURLException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} 
-				
-			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-		});
-		Label lblSpeed = managedForm.getToolkit().createLabel(composite, "Speed", SWT.NONE);
-		new Label(composite, SWT.NONE);
+		Composite composite_1 = managedForm.getToolkit().createComposite(managedForm.getForm().getBody(), SWT.NONE);
+		composite_1.setLayout(new GridLayout(1, false));
+		composite_1.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
+		managedForm.getToolkit().paintBordersFor(composite_1);
 		
-		Combo combo_1 = new Combo(composite, SWT.NONE);
-		combo_1.setItems(new String[] {"9600", "115200", "230400"});
-		combo_1.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
-		managedForm.getToolkit().adapt(combo_1);
-		managedForm.getToolkit().paintBordersFor(combo_1);
-		combo_1.select(1);
-		new Label(composite, SWT.NONE);
-		new Label(managedForm.getForm().getBody(), SWT.NONE);
+		Section section_2 = managedForm.getToolkit().createSection(composite_1, Section.TWISTIE | Section.TITLE_BAR);
+		section_2.setBounds(0, 0, 98, 21);
+		managedForm.getToolkit().paintBordersFor(section_2);
+		section_2.setText("Related info");
+		section_2.setExpanded(true);
 		
 		IToolBarManager manager = form.getToolBarManager();
 

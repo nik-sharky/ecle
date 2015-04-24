@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.ToolBar;
 import org.ploys.eclipse.embed.common.Converter;
@@ -36,6 +37,10 @@ public class MapComboToolItem<V> extends ComboToolItem {
 		updateView();
 	}
 
+	public void addSelectionListener(SelectionListener listener) {
+		getControl().addSelectionListener(listener);
+	}
+	
 	public void setConverter(Converter<V, String> conv) {
 		converter = conv;
 	}
@@ -57,6 +62,10 @@ public class MapComboToolItem<V> extends ComboToolItem {
 		return val == null ? null : convert(val);
 	}
 
+	public boolean containsValue(V value) {
+		return idxMap.containsKey(value);		
+	}
+	
 	public void select(V value) {
 		Combo cp = getControl();
 

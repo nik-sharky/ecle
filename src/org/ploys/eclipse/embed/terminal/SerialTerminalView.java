@@ -8,13 +8,7 @@ import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
 import jssc.SerialPortList;
 
-import org.eclipse.cdt.utils.pty.PTYOutputStream;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CLabel;
-import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -25,23 +19,17 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.statushandlers.StatusManager;
-import org.eclipse.wb.swt.ResourceManager;
-import org.eclipse.wb.swt.SWTResourceManager;
-import org.ploys.eclipse.embed.common.State;
 import org.ploys.eclipse.embed.terminal.ui.PortMonitor;
+import org.ploys.eclipse.embed.terminal.ui.PortSend;
+import org.ploys.eclipse.embed.terminal.ui.PortSendHandler;
 import org.ploys.eclipse.embed.terminal.ui.PortStatus;
-import org.ploys.eclipse.embed.terminal.ui.PortToolsHandler;
-import org.ploys.eclipse.embed.terminal.ui.PortStatus.Led;
 import org.ploys.eclipse.embed.terminal.ui.PortTools;
-import org.ploys.eclipse.embed.ui.Activator;
-import org.ploys.eclipse.embed.ui.ComboToolItem;
+import org.ploys.eclipse.embed.terminal.ui.PortToolsHandler;
 import org.ploys.eclipse.embed.ui.Icons;
-import org.ploys.eclipse.embed.ui.SpacerToolItem;
 import org.ploys.eclipse.embed.ui.UI;
 
 public class SerialTerminalView extends ViewPart {
-	private Combo eRequest;
-
+	PortSend sender;
 	PortTools portTools;
 	PortMonitor monitor;
 	PortStatus status;
@@ -53,11 +41,10 @@ public class SerialTerminalView extends ViewPart {
 
 	@PreDestroy
 	public void dispose() {
-		if (serialPort != null && serialPort.isOpened()) {
+		if (isPortActive()) {
 			try {
-				serialPort.closePort();
+				disconnect(false);
 			} catch (SerialPortException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -65,10 +52,6 @@ public class SerialTerminalView extends ViewPart {
 
 	public void setFocus() {
 		// TODO Set the focus to control
-	}
-
-	public String getPID() {
-		return Activator.PLUGIN_ID;
 	}
 
 	/**
@@ -100,36 +83,7 @@ public class SerialTerminalView extends ViewPart {
 		pMonitor.setLayout(gl_pMonitor);
 
 		monitor.createUI(pMonitor);
-
-		ToolBar toolBar_3 = new ToolBar(pMonitor, SWT.FLAT | SWT.RIGHT);
-
-		ToolItem fDuplex = new ToolItem(toolBar_3, SWT.CHECK);
-		fDuplex.setToolTipText("Duplex mode");
-		fDuplex.setHotImage(Icons.ico("monitor"));
-		fDuplex.setImage(Icons.ico("monitor-off"));
-
-		Composite composite_1 = new Composite(pMonitor, SWT.NONE);
-		composite_1.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
-		GridLayout gl_composite_1 = new GridLayout(4, false);
-		gl_composite_1.marginHeight = 0;
-		gl_composite_1.marginWidth = 0;
-		composite_1.setLayout(gl_composite_1);
-
-		eRequest = new Combo(composite_1, SWT.BORDER);
-		eRequest.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-
-		Button aSend = new Button(composite_1, SWT.NONE);
-		aSend.setText("Send");
-
-		Button fCR = new Button(composite_1, SWT.TOGGLE);
-		fCR.setText("+CR");
-
-		Button fLF = new Button(composite_1, SWT.TOGGLE);
-		fLF.setText("+LF");
-
-		Label spcStatus = new Label(cParent, SWT.SEPARATOR | SWT.HORIZONTAL | SWT.SHADOW_IN);
-		spcStatus.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-
+		sender.createUI(pMonitor);
 		status.createUI(cParent);
 
 		initPort();
@@ -138,6 +92,27 @@ public class SerialTerminalView extends ViewPart {
 	protected void createControllers() {
 		monitor = new PortMonitor();
 		status = new PortStatus();
+
+		sender = new PortSend(new PortSendHandler() {
+			@Override
+			public void sendData(byte[] data, boolean hdup) {
+				if (hdup) {
+					monitor.append(new String(data));
+				}
+
+				if (!isPortActive())
+					return;
+
+				try {
+					setLed(SerialPin.TXD, true);
+					serialPort.writeBytes(data);
+					setLed(SerialPin.TXD, false);
+				} catch (SerialPortException e) {
+					e.printStackTrace();
+				}
+			}
+		});
+
 		portTools = new PortTools(new PortToolsHandler() {
 			@Override
 			public void onPortChange() {
@@ -146,76 +121,93 @@ public class SerialTerminalView extends ViewPart {
 			}
 
 			@Override
-			public void onParamChange() {
-				// TODO Auto-generated method stub
-
+			public void onParamsChange() {
+				if (isPortActive()) {
+					try {
+						portTools.setPortParams(serialPort);
+						updatePortStatus(true);
+					} catch (SerialPortException e) {
+						UI.errorDialog(StatusManager.SHOW, "Can't set params", e);
+					}
+				}
 			}
 
 			@Override
-			public void onConnect(boolean state) {
+			public boolean onConnect(boolean state) {
 				try {
 					if (state) {
 						portTools.disablePortSelect(true);
 						connect();
+						return true;
 					} else {
-						disconnect();
+						disconnect(true);
 						portTools.disablePortSelect(false);
+						return false;
 					}
 				} catch (Exception e) {
 					UI.errorDialog(StatusManager.SHOW, "Can't connect", e);
 					portTools.disablePortSelect(false);
+					return false;
 				}
+			}
 
+			@Override
+			public void onPinChange(SerialPin pin, boolean state) {
+				if (!isPortActive())
+					return;
+
+				try {
+					if (pin == SerialPin.RTS)
+						serialPort.setRTS(state);
+
+					if (pin == SerialPin.DTR)
+						serialPort.setDTR(state);
+				} catch (SerialPortException e) {
+					UI.errorDialog(StatusManager.SHOW, "Can't set pin", e);
+				}
 			}
 		});
 	}
 
 	// region *** Initialization ***
+	private int MASK_ALL = SerialPort.MASK_BREAK | SerialPort.MASK_CTS | SerialPort.MASK_DSR | SerialPort.MASK_RING | SerialPort.MASK_ERR
+			| SerialPort.MASK_RLSD | SerialPort.MASK_RXCHAR;
+	private int[] LINES_OFF = { 0, 0, 0, 0 };
 
 	protected void initPort() {
 		String[] ports = SerialPortList.getPortNames();
 		portTools.setParams(ports, 115200);
 	}
 
-	private int MASK_ALL = SerialPort.MASK_BREAK | SerialPort.MASK_CTS | SerialPort.MASK_DSR | SerialPort.MASK_RING | SerialPort.MASK_ERR
-			| SerialPort.MASK_RLSD | SerialPort.MASK_RXCHAR;
-	private int[] LINES_OFF = { 0, 0, 0, 0 };
-
 	protected boolean connect() throws SerialPortException {
-		disconnect();
+		disconnect(true);
 
 		serialPort = new SerialPort(portTools.getPort());
 		try {
 			serialPort.openPort();
-
 			portTools.setPortParams(serialPort);
-
-			int[] lines = serialPort.getLinesStatus();
-			setLeds(lines, false, 0);
 			serialPort.addEventListener(serialListener, MASK_ALL);
 
-			updatePortStatus(portTools.getStatus());
+			updatePortStatus(true);
 		} catch (SerialPortException e) {
 			e.printStackTrace();
-			return false;
+			updatePortStatus(false);
+
+			throw (e);
 		}
 
 		return true;
-		// setRTS,
-		// setDTR);
-
 	}
 
-	protected void disconnect() throws SerialPortException {
-		if (serialPort != null) {
-			if (serialPort.isOpened()) {
-				serialPort.removeEventListener();
-				serialPort.closePort();
-			}
+	protected void disconnect(boolean updateStatus) throws SerialPortException {
+		if (isPortActive()) {
+			serialPort.removeEventListener();
+			serialPort.closePort();
 		}
 
-		setLeds(LINES_OFF, false, 0);
-		updatePortStatus("Closed");
+		if (updateStatus) {
+			updatePortStatus(false);
+		}
 	}
 
 	SerialPortEventListener serialListener = new SerialPortEventListener() {
@@ -224,7 +216,7 @@ public class SerialTerminalView extends ViewPart {
 			final int etype = e.getEventType();
 			final int evalue = e.getEventValue();
 
-			System.out.println(e.getEventType());
+			// System.out.println(e.getEventType());
 
 			switch (etype) {
 			case SerialPortEvent.CTS:
@@ -232,10 +224,10 @@ public class SerialTerminalView extends ViewPart {
 			case SerialPortEvent.RING:
 			case SerialPortEvent.RLSD:
 			case SerialPortEvent.ERR:
-				setLed(toLed(etype), evalue != 0);
+				setLed(SerialPin.fromSerialEventType(etype), evalue != 0);
 				break;
 			case SerialPortEvent.BREAK:
-				setLed(toLed(etype), true);
+				setLed(SerialPin.fromSerialEventType(etype), true);
 				break;
 			case SerialPortEvent.RXCHAR:
 			case SerialPortEvent.RXFLAG:
@@ -246,47 +238,21 @@ public class SerialTerminalView extends ViewPart {
 			}
 		}
 
-		private PortStatus.Led toLed(int etype) {
-			switch (etype) {
-			case SerialPortEvent.CTS:
-				return PortStatus.Led.CTS;
-			case SerialPortEvent.DSR:
-				return PortStatus.Led.DSR;
-			case SerialPortEvent.RING:
-				return PortStatus.Led.RNG;
-			case SerialPortEvent.RLSD:
-				return PortStatus.Led.DCD;
-			case SerialPortEvent.ERR:
-				return PortStatus.Led.ERROR;
-			case SerialPortEvent.BREAK:
-				return PortStatus.Led.BREAK;
-			}
-
-			return null;
-		}
 	};
 
 	private void readData(int len) {
 		try {
-			UI.runAsync(new Runnable() {
-				public void run() {
-					status.setLed(PortStatus.Led.RXD, true);
-				}
-			});
+			setLed(SerialPin.RXD, true);
 			final String data = serialPort.readString(len);
 			UI.runAsync(new Runnable() {
 				public void run() {
 					monitor.append(data);
-					status.setLed(PortStatus.Led.RXD, false);
 				}
 			});
-
+			setLed(SerialPin.RXD, false);
 		} catch (SerialPortException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		// TODO Auto-generated method stub
-
 	}
 
 	// endregion
@@ -295,33 +261,48 @@ public class SerialTerminalView extends ViewPart {
 		return serialPort != null && serialPort.isOpened();
 	}
 
-	private void setLed(final Led led, final boolean state) {
+	private void setLed(final SerialPin led, final boolean state) {
 		UI.runAsync(new Runnable() {
 			public void run() {
+				if (!state) {
+					// wait a bit before turn-off for show fast-switching leds
+					synchronized (this) {
+						try {
+							wait(30);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+				
 				status.setLed(led, state);
 			}
 		});
 	}
 
-	private void setLeds(final int[] line, final boolean br, final int err) {
-		UI.runAsync(new Runnable() {
-			public void run() {
-				if (!isPortActive()) {
-					status.resetLeds();
-					return;
-				}
+	private int[] getLinesStatus() {
+		if (!isPortActive())
+			return LINES_OFF;
 
-				status.setLinesStatus(line);
-				status.setBreak(br);
-				status.setError(err);
-			}
-		});
+		try {
+			return serialPort.getLinesStatus();
+		} catch (SerialPortException e) {
+			return LINES_OFF;
+		}
 	}
 
-	private void updatePortStatus(final String str) {
+	private void updatePortStatus(final boolean opened) {
+		final String st = opened ? "Port: " + portTools.getStatus() : "Port closed";
+		final int[] lines = getLinesStatus();
+
 		UI.runAsync(new Runnable() {
 			public void run() {
-				status.setPortStatus("Port: " + str);
+				setPartName(opened ? "Serial terminal " + portTools.getPort() : "Serial terminal");
+				setTitleImage(Icons.ico(opened ? "terminal-on" : "terminal"));
+
+				status.resetLeds();
+				status.setPortStatus(st, opened);
+				status.setLinesStatus(lines);
 			}
 		});
 	}
