@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+    
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="popup:org.eclipse.ui.projectConfigure?after=additions">
+         <command
+               commandId="org.ploys.eclipse.embed.core.addRemoveSmingNature"
+               label="Disable Sample builder"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="selection">
+                  <count
+                        value="1">
+                  </count>
+                  <iterate>
+                     <adapt
+                           type="org.eclipse.core.resources.IProject">
+                        <test
+                              value="org.ploys.eclipse.embed.core.smingNature"
+                              property="org.eclipse.core.resources.projectNature">
+                        </test>
+                     </adapt>
+                  </iterate>
+               </with>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.ploys.eclipse.embed.core.addRemoveSmingNature"
+               label="Enable Sample builder"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="selection">
+                  <count
+                        value="1">
+                  </count>
+                  <iterate>
+                     <adapt
+                           type="org.eclipse.core.resources.IProject">
+                        <not>
+                           <test
+                                 value="org.ploys.eclipse.embed.core.smingNature"
+                                 property="org.eclipse.core.resources.projectNature">
+                           </test>
+                        </not>
+                     </adapt>
+                  </iterate>
+               </with>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.eclipse.ui.main.menu">
+      </menuContribution>
+   </extension>
+   
+   <extension  
+         point="org.eclipse.core.contenttype.contentTypes">  
+      <content-type  
+            base-type="org.eclipse.core.runtime.xml"  
+            file-extensions="mbd"  
+            id="org.ploys.eclipse.embed.content.mbd"  
+            name="Embed config Files"  
+            priority="normal">  
+      </content-type>  
+   </extension>  
+   
+   <extension
+         point="org.eclipse.ui.actionSets">
+      <actionSet
+            label="Embed"
+            visible="true"
+            id="org.ploys.eclipse.embed.actions">
+         <menu
+               id="org.ploys.eclipse.embed.menu"
+               label="Embed tools">
+         </menu>
+         <action
+               label="Serial terminal"
+               icon="icons/full/eview16/terminal.png"
+               class="org.ploys.eclipse.embed.core.actions.TerminalAction"
+               tooltip="Serial terminal"
+               menubarPath="EmbedMenu/mainGroup"
+               toolbarPath="mainGroup"
+               id="org.ploys.eclipse.embed.actions.Terminal">
+         </action>
+         <action
+               label="&amp;Preferences..."
+               icon="icons/full/eview16/chip/cpu-gear.png"
+               class="org.ploys.eclipse.embed.core.actions.PrefsAction"
+               tooltip="Embed Preferences"
+               menubarPath="EmbedMenu/mainGroup"
+               toolbarPath="mainGroup"
+               id="org.ploys.eclipse.embed.actions.Preferences">
+         </action>
+      </actionSet>
+   </extension>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            name="Embed Wizards"
+            id="org.ploys.eclipse.embed.wizards">
+      </category>
+
+      <wizard
+            category="org.ploys.eclipse.embed.wizards"
+            class="org.ploys.eclipse.embed.wizards.SmingWizard"
+            icon="icons/full/eview16/chip/cpu.png"
+            id="org.ploys.eclipse.embed.wizards.NewSmingProject"
+            name="Create embedded project"
+            project="true">
+      </wizard>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            name="Embed Preferences"
+            class="org.ploys.eclipse.embed.core.prefs.PrefPageGeneral"
+            id="org.ploys.eclipse.embed.prefs">            
+      </page>
+      <page
+   			name="Sming framework"
+   			category="org.ploys.eclipse.embed.prefs"
+   			class="org.ploys.eclipse.embed.core.prefs.PrefPageSming"
+   			id="org.ploys.eclipse.embed.prefs.sming"/>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="org.ploys.eclipse.embed.core.prefs.PrefsInitializer">
+      </initializer>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            name="Embedded tools"
+            id="org.ploys.eclipse.embed.tools">
+      </category>
+      <view
+            allowMultiple="false"
+            category="org.ploys.eclipse.embed.tools"
+            class="org.ploys.eclipse.embed.terminal.SerialTerminalView"
+            icon="icons/full/eview16/terminal.png"
+            id="org.ploys.eclipse.embed.tools.SerialTerminalView"
+            name="Serial terminal">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.eclipse.cdt.ui.CPerspective">
+         <view
+               closeable="true"
+               id="org.ploys.eclipse.embed.tools.SerialTerminalView"
+               ratio="0.5"
+               relationship="right"
+               relative="org.eclipse.ui.views.ConsoleView"
+               visible="true">
+         </view>
+      </perspectiveExtension>
+   </extension>
+   <extension
+         point="org.eclipse.help.contexts">
+      <contexts
+            file="contexts.xml">
+      </contexts>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="org.ploys.eclipse.embed.editors.MBDEditor"
+            contributorClass="org.ploys.eclipse.embed.editors.MBDEditorContributor"
+            default="true"
+            extensions="mbd"
+            icon="icons/full/eview16/chip/cpu.png"
+            id="org.ploys.eclipse.embed.editors.MBDEditor"
+            name="Embed config editor">
+             <contentTypeBinding  
+               contentTypeId="org.ploys.eclipse.embed.content.mbd">  
+         </contentTypeBinding> 
+      </editor>
+   </extension>
+
+</plugin>
