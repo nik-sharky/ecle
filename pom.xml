@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.ploys.eclipse</groupId>
-    <artifactId>parent</artifactId>
+
+    <groupId>org.ploys.ecle</groupId>
+    <artifactId>ecle.parent</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
@@ -12,13 +13,8 @@
         <built.repo.dir>${project.build.directory}/repo</built.repo.dir>
         <github.repo.username>ploys</github.repo.username>
         <gpg.passphrase></gpg.passphrase>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
-    <parent>
-        <groupId>org.sonatype.oss</groupId>
-        <artifactId>oss-parent</artifactId>
-        <version>7</version>
-    </parent>
 
     <scm>
         <connection>scm:git:git://github.com/${github.repo.username}/eclipse-embed-plugin.git</connection>
@@ -29,22 +25,21 @@
     <!-- Sonatype repos -->
     <distributionManagement>
         <snapshotRepository>
-            <id>sonatype-nexus-snapshots</id>
-            <name>Sonatype Nexus snapshot repository</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <id>nexus-ploys</id>
+            <name>Ploys.org Nexus snapshot repository</name>
+            <url>http://nexus.ploys.org/content/repositories/snapshots</url>
         </snapshotRepository>
         <repository>
-            <id>sonatype-nexus-staging</id>
-            <name>Sonatype Nexus release repository</name>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <id>nexus-ploys</id>
+            <name>Ploys.org Nexus release repository</name>
+            <url>http://nexus.ploys.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
 
     <modules>
-        <module>eclipse-embed-plugin</module>
-        <module>eclipse-embed-feature</module>
-        <!--<module>eclipse-embed-site</module>-->
-        <!--<module>eclipse-embed-product</module>-->
+        <module>org.ploys.ecle.plugin</module>
+        <module>org.ploys.ecle.feature</module>
+        <module>org.ploys.ecle.site</module>
     </modules>
 
     <build>
@@ -340,12 +335,24 @@
                     <id>platform_luna</id>
                     <layout>p2</layout>
                     <url>http://download.eclipse.org/eclipse/updates/4.4</url>
+                    <releases>
+                        <updatePolicy>daily</updatePolicy>
+                    </releases>
+                    <snapshots>
+                        <updatePolicy>daily</updatePolicy>
+                    </snapshots>
                 </repository>
 
                 <repository>
                     <id>release-train_luna</id>
                     <layout>p2</layout>
                     <url>http://download.eclipse.org/releases/luna</url>
+                    <releases>
+                        <updatePolicy>daily</updatePolicy>
+                    </releases>
+                    <snapshots>
+                        <updatePolicy>daily</updatePolicy>
+                    </snapshots>
                 </repository>
             </repositories>
         </profile>
@@ -356,16 +363,15 @@
             <id>nebula</id>
             <layout>p2</layout>
             <url>http://download.eclipse.org/technology/nebula/snapshot</url>
+
+            <releases>
+                <updatePolicy>daily</updatePolicy>
+            </releases>
+            <snapshots>
+                <updatePolicy>daily</updatePolicy>
+            </snapshots>
         </repository>
     </repositories>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>tycho-staged</id>
-            <url>https://oss.sonatype.org/content/repositories/orgeclipsetycho-1004/</url>
-        </pluginRepository>
-    </pluginRepositories>
-
 </project>
 
  
