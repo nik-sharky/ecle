@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <description name="Ploys eclipse plugins" url="http://eclipse.ploys.org">
+      
+   </description>
+   <feature url="features/org.ploys.ecle.feature_1.0.0.qualifier.jar" id="org.ploys.ecle.feature" version="1.0.0.qualifier">
+      <category name="org.ploys.ecle"/>
+   </feature>
+
+   <category-def name="org.ploys.ecle" label="ECLE: Eclipse embedder tools"/>
+</site>

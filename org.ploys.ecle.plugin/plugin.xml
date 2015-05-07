@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+    <extension
+            point="org.eclipse.ui.menus">
+        <menuContribution
+              locationURI="menu:org.eclipse.ui.main.menu?after=additions">
+           <menu
+                 id="org.ploys.ecle.menus.main"
+                 label="ECLE">
+              <command
+                    commandId="org.ploys.ecle.commands.terminal"
+                    icon="icons/full/eview16/terminal.png"
+                    id="org.ploys.ecle.menus.terminalCommand"
+                    label="Show terminal">
+              </command>
+              <command
+                    commandId="org.ploys.ecle.commands.prefs"
+                    icon="icons/full/eview16/chip/cpu-gear.png"
+                    label="Preferences..."
+                    style="push">
+              </command>
+           </menu>
+        </menuContribution>
+        <menuContribution
+              locationURI="toolbar:org.eclipse.ui.main.toolbar?after=additions">
+           <toolbar
+                 id="org.ploys.ecle.toolbars.main">
+              <command
+                    commandId="org.ploys.ecle.commands.terminal"
+                    icon="icons/full/eview16/terminal.png"
+                    id="org.ploys.ecle.toolbars.terminalCommand"
+                    label="Serial terminal">
+              </command>
+              <command
+                    commandId="org.ploys.ecle.commands.prefs"
+                    icon="icons/full/eview16/chip/cpu-gear.png"
+                    label="ECLE Preferences..."
+                    style="push">
+              </command>
+           </toolbar>
+        </menuContribution>
+    </extension>
+    <extension
+          point="org.eclipse.ui.commands">
+       <category
+             id="org.ploys.ecle.commands.category"
+             name="ECLE tools">
+       </category>
+       <command
+             categoryId="org.ploys.ecle.commands.category"
+             id="org.ploys.ecle.commands.terminal"
+             name="Show terminal">
+       </command>
+       <command
+             categoryId="org.ploys.ecle.commands.category"
+             id="org.ploys.ecle.commands.prefs"
+             name="Preferences...">
+       </command>
+    </extension>
+    <extension
+          point="org.eclipse.ui.handlers">
+       <handler
+             class="org.ploys.ecle.handlers.TerminalHandler"
+             commandId="org.ploys.ecle.commands.terminal">
+       </handler>
+       <handler
+             class="org.ploys.ecle.handlers.PrefsHandler"
+             commandId="org.ploys.ecle.commands.prefs">
+       </handler>
+    </extension>
+    <extension
+          point="org.eclipse.ui.bindings">
+       <key
+             commandId="org.ploys.ecle.commands.terminal"
+             contextId="org.eclipse.ui.contexts.window"
+             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+             sequence="M3+T">
+       </key>
+    </extension>
+
+
+    <extension
+            point="org.eclipse.ui.preferencePages">
+        <page
+                name="ECLE preferences"
+                class="org.ploys.ecle.prefs.PrefPageGeneral"
+                id="org.ploys.ecle.prefs">
+        </page>
+        <page
+                name="Sming framework"
+                category="org.ploys.ecle.prefs"
+                class="org.ploys.ecle.prefs.PrefPageSming"
+                id="org.ploys.ecle.prefs.sming"/>
+    </extension>
+    <extension
+            point="org.eclipse.ui.perspectiveExtensions">
+        <perspectiveExtension
+                targetID="org.eclipse.cdt.ui.CPerspective">
+            <view
+                    closeable="true"
+                    id="org.ploys.ecle.tools.SerialTerminalView"
+                    ratio="0.5"
+                    relationship="right"
+                    relative="org.eclipse.ui.console.ConsoleView"
+                    visible="true">
+            </view>
+        </perspectiveExtension>
+    </extension>
+    <extension
+            point="org.eclipse.ui.newWizards">
+        <category
+                name="Embed Wizards"
+                id="org.ploys.ecle.wizards">
+        </category>
+
+        <wizard
+                category="org.ploys.ecle.wizards"
+                class="org.ploys.ecle.wizards.SmingWizard"
+                icon="icons/full/eview16/chip/cpu.png"
+                id="org.ploys.ecle.wizards.NewSmingProject"
+                name="Create embedded project"
+                project="true">
+        </wizard>
+    </extension>
+    <extension
+            point="org.eclipse.core.runtime.preferences">
+        <initializer
+                class="org.ploys.ecle.prefs.PrefsInitializer">
+        </initializer>
+    </extension>
+    <extension
+            point="org.eclipse.ui.views">
+        <category
+                name="Embedded tools"
+                id="org.ploys.ecle.tools">
+        </category>
+        <view
+                allowMultiple="false"
+                category="org.ploys.ecle.tools"
+                class="org.ploys.ecle.terminal.SerialTerminalView"
+                icon="icons/full/eview16/terminal.png"
+                id="org.ploys.ecle.tools.SerialTerminalView"
+                name="ECLE terminal">
+        </view>
+    </extension>
+    <extension
+            point="org.eclipse.ui.editors">
+        <editor
+                class="org.ploys.ecle.editors.MBDEditor"
+                contributorClass="org.ploys.ecle.editors.MBDEditorContributor"
+                default="true"
+                extensions="mbd"
+                icon="icons/full/eview16/chip/cpu.png"
+                id="org.ploys.ecle.editors.MBDEditor"
+                name="Embed config editor">
+            <contentTypeBinding
+                    contentTypeId="org.ploys.ecle.content.mbd">
+            </contentTypeBinding>
+        </editor>
+    </extension>
+    <extension
+            point="org.eclipse.help.contexts">
+        <contexts
+                file="contexts.xml">
+        </contexts>
+    </extension>
+
+    <extension
+            point="org.eclipse.core.contenttype.contentTypes">
+        <content-type
+                base-type="org.eclipse.core.runtime.xml"
+                file-extensions="mbd"
+                id="org.ploys.ecle.content.mbd"
+                name="Embed config Files"
+                priority="normal">
+        </content-type>
+    </extension>
+
+</plugin>
