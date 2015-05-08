@@ -6,7 +6,6 @@ import jssc.SerialPort;
 import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
-import jssc.SerialPortList;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -14,7 +13,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.statushandlers.StatusManager;
-import org.ploys.ecle.common.SerialPin;
+import org.ploys.ecle.common.Serial;
 import org.ploys.ecle.terminal.ui.PortMonitor;
 import org.ploys.ecle.terminal.ui.PortSend;
 import org.ploys.ecle.terminal.ui.PortSendHandler;
@@ -100,9 +99,9 @@ public class SerialTerminalView extends ViewPart {
 					return;
 
 				try {
-					setLed(SerialPin.TXD, true);
+					setLed(Serial.Pin.TXD, true);
 					serialPort.writeBytes(data);
-					setLed(SerialPin.TXD, false);
+					setLed(Serial.Pin.TXD, false);
 				} catch (SerialPortException e) {
 					e.printStackTrace();
 				}
@@ -148,16 +147,23 @@ public class SerialTerminalView extends ViewPart {
 			}
 
 			@Override
-			public void onPinChange(SerialPin pin, boolean state) {
+			public void onPinChange(Serial.Pin pin, boolean state) {
 				if (!isPortActive())
 					return;
 
 				try {
-					if (pin == SerialPin.RTS)
+					switch (pin) {
+					case RTS:
 						serialPort.setRTS(state);
 
-					if (pin == SerialPin.DTR)
+						if (!state && isPortOpened()) {
+							onSessionStart();
+						}
+						break;
+					case DTR:
 						serialPort.setDTR(state);
+						break;
+					}
 				} catch (SerialPortException e) {
 					UI.errorDialog(StatusManager.SHOW, "Can't set pin", e);
 				}
@@ -171,8 +177,19 @@ public class SerialTerminalView extends ViewPart {
 	private int[] LINES_OFF = { 0, 0, 0, 0 };
 
 	protected void initPort() {
-		String[] ports = SerialPortList.getPortNames();
+		String[] ports = Serial.getPortNames();
 		portTools.setParams(ports, 115200);
+	}
+
+	protected boolean isPortOpened() {
+		return isPortActive() && serialPort.isOpened();
+	}
+
+	protected void onSessionStart() {
+		if (!monitor.isClearOnStart())
+			return;
+
+		monitor.clear();
 	}
 
 	protected boolean connect() throws SerialPortException {
@@ -192,6 +209,7 @@ public class SerialTerminalView extends ViewPart {
 			throw (e);
 		}
 
+		onSessionStart();
 		return true;
 	}
 
@@ -220,10 +238,10 @@ public class SerialTerminalView extends ViewPart {
 			case SerialPortEvent.RING:
 			case SerialPortEvent.RLSD:
 			case SerialPortEvent.ERR:
-				setLed(SerialPin.fromSerialEventType(etype), evalue != 0);
+				setLed(Serial.Pin.fromSerialEventType(etype), evalue != 0);
 				break;
 			case SerialPortEvent.BREAK:
-				setLed(SerialPin.fromSerialEventType(etype), true);
+				setLed(Serial.Pin.fromSerialEventType(etype), true);
 				break;
 			case SerialPortEvent.RXCHAR:
 			case SerialPortEvent.RXFLAG:
@@ -238,14 +256,14 @@ public class SerialTerminalView extends ViewPart {
 
 	private void readData(int len) {
 		try {
-			setLed(SerialPin.RXD, true);
+			setLed(Serial.Pin.RXD, true);
 			final String data = serialPort.readString(len);
 			UI.runAsync(new Runnable() {
 				public void run() {
 					monitor.append(data);
 				}
 			});
-			setLed(SerialPin.RXD, false);
+			setLed(Serial.Pin.RXD, false);
 		} catch (SerialPortException e) {
 			e.printStackTrace();
 		}
@@ -257,7 +275,7 @@ public class SerialTerminalView extends ViewPart {
 		return serialPort != null && serialPort.isOpened();
 	}
 
-	private void setLed(final SerialPin led, final boolean state) {
+	private void setLed(final Serial.Pin led, final boolean state) {
 		UI.runAsync(new Runnable() {
 			public void run() {
 				if (!state) {
@@ -270,7 +288,7 @@ public class SerialTerminalView extends ViewPart {
 						}
 					}
 				}
-				
+
 				status.setLed(led, state);
 			}
 		});
@@ -293,7 +311,7 @@ public class SerialTerminalView extends ViewPart {
 
 		UI.runAsync(new Runnable() {
 			public void run() {
-				setPartName(opened ? "Serial terminal " + portTools.getPort() : "Serial terminal");
+				setPartName(opened ? "ECLE terminal " + portTools.getPort() : "ECLE terminal");
 				setTitleImage(Icons.ico(opened ? "terminal-on" : "terminal"));
 
 				status.resetLeds();

@@ -12,6 +12,10 @@ public class UI {
 		Display.getDefault().asyncExec(runnable);
 	}
 
+	public static void runSync(Runnable runnable) {
+		Display.getDefault().syncExec(runnable);
+	}
+
 	public static void errorDialog(int mode, String message, Exception e) {
 		e.printStackTrace();
 		

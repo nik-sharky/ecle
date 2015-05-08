@@ -2,7 +2,6 @@ package org.ploys.ecle.terminal.ui;
 
 import jssc.SerialPort;
 import jssc.SerialPortException;
-import jssc.SerialPortList;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusAdapter;
@@ -15,14 +14,16 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.ploys.ecle.common.Converter;
-import org.ploys.ecle.common.SerialPin;
+import org.ploys.ecle.common.Serial;
 import org.ploys.ecle.common.State;
 import org.ploys.ecle.ui.Icons;
 import org.ploys.ecle.ui.MapComboToolItem;
 import org.ploys.ecle.ui.SpacerToolItem;
+import org.ploys.ecle.ui.UI;
 
 public class PortTools {
 	static Integer[] dataRates = { 1200, 2400, 4800, 9600, 14400, 19200, 38400, 57600, 74880, 115200, 128000, 230400, 256000, 460800, 921600 };
@@ -42,7 +43,7 @@ public class PortTools {
 	private PortTools.StopBits cStopBits;
 	private PortTools.Parity cParity;
 	private PortTools.DataRate cSpeed;
-	private ToolItem fRts, fDtr;
+	private ToolItem fRts, fDtr, ftRts;
 
 	private PortToolsHandler handler;
 
@@ -59,7 +60,7 @@ public class PortTools {
 		aConnect = new ToolItem(tbPort, SWT.CHECK);
 		aConnect.setHotImage(Icons.ico("plug-connect"));
 		aConnect.setImage(Icons.ico("plug-disconnect"));
-		aConnect.setText("Connect");
+		aConnect.setText("Open");
 
 		new SpacerToolItem(tbPort, 10);
 		cPort = new PortTools.Port(tbPort, SWT.READ_ONLY, "Serial port");
@@ -77,6 +78,14 @@ public class PortTools {
 		composite_2.setLayout(new GridLayout(1, false));
 
 		ToolBar tbPins = new ToolBar(parent, SWT.FLAT | SWT.RIGHT);
+
+		ftRts = new ToolItem(tbPins, SWT.NONE);
+		ftRts.setText("Twitch RTS");
+		ftRts.setToolTipText("Twitch RTS pin");
+		// fRts.setHotImage(Icons.state(State.ON));
+		// fRts.setImage(Icons.state(State.OFF));
+
+		new SpacerToolItem(tbPins, 10);
 
 		fRts = new ToolItem(tbPins, SWT.CHECK);
 		fRts.setHotImage(Icons.state(State.ON));
@@ -102,6 +111,7 @@ public class PortTools {
 				ToolItem button = ((ToolItem) ev.widget);
 				boolean result = handler.onConnect(button.getSelection());
 				button.setSelection(result);
+				aConnect.setText(result ? "Close" : "Open");
 			}
 		});
 
@@ -123,7 +133,7 @@ public class PortTools {
 			@Override
 			public void widgetSelected(SelectionEvent ev) {
 				ToolItem button = ((ToolItem) ev.widget);
-				handler.onPinChange(SerialPin.RTS, button.getSelection());
+				handler.onPinChange(Serial.Pin.RTS, button.getSelection());
 			}
 		});
 
@@ -131,7 +141,35 @@ public class PortTools {
 			@Override
 			public void widgetSelected(SelectionEvent ev) {
 				ToolItem button = ((ToolItem) ev.widget);
-				handler.onPinChange(SerialPin.DTR, button.getSelection());
+				handler.onPinChange(Serial.Pin.DTR, button.getSelection());
+			}
+		});
+
+		ftRts.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent ev) {
+				UI.runAsync(new Runnable() {
+					@Override
+					public void run() {
+						boolean state = fRts.getSelection();
+						ToolBar tb = fRts.getParent();
+
+						fRts.setSelection(!state);
+						fRts.notifyListeners(SWT.Selection, new Event());
+						tb.update();
+						synchronized (this) {
+							try {
+								wait(100);
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
+						}
+						
+						fRts.setSelection(state);
+						fRts.notifyListeners(SWT.Selection, new Event());
+						tb.update();
+					}
+				});
 			}
 		});
 
@@ -157,7 +195,7 @@ public class PortTools {
 		public void refreshList() {
 			String val = getValue();
 			Combo cb = getControl();
-			initList(SerialPortList.getPortNames());
+			initList(Serial.getPortNames());
 
 			if (val != null) {
 				if (containsValue(val))

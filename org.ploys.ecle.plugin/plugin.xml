@@ -1,6 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+    <extension
+          point="org.eclipse.ui.commands">
+       <category
+             id="org.ploys.ecle.commands.category"
+             name="ECLE tools">
+       </category>
+       <command
+             categoryId="org.ploys.ecle.commands.category"
+             id="org.ploys.ecle.commands.terminal"
+             name="Show terminal">
+       </command>
+       <command
+             categoryId="org.ploys.ecle.commands.category"
+             id="org.ploys.ecle.commands.prefs"
+             name="Preferences...">
+       </command>
+    </extension>
+    <extension
+          point="org.eclipse.ui.handlers">
+       <handler
+             class="org.ploys.ecle.handlers.TerminalHandler"
+             commandId="org.ploys.ecle.commands.terminal">
+       </handler>
+       <handler
+             class="org.ploys.ecle.handlers.PrefsHandler"
+             commandId="org.ploys.ecle.commands.prefs">
+       </handler>
+    </extension>
 
     <extension
             point="org.eclipse.ui.menus">
@@ -41,34 +69,6 @@
               </command>
            </toolbar>
         </menuContribution>
-    </extension>
-    <extension
-          point="org.eclipse.ui.commands">
-       <category
-             id="org.ploys.ecle.commands.category"
-             name="ECLE tools">
-       </category>
-       <command
-             categoryId="org.ploys.ecle.commands.category"
-             id="org.ploys.ecle.commands.terminal"
-             name="Show terminal">
-       </command>
-       <command
-             categoryId="org.ploys.ecle.commands.category"
-             id="org.ploys.ecle.commands.prefs"
-             name="Preferences...">
-       </command>
-    </extension>
-    <extension
-          point="org.eclipse.ui.handlers">
-       <handler
-             class="org.ploys.ecle.handlers.TerminalHandler"
-             commandId="org.ploys.ecle.commands.terminal">
-       </handler>
-       <handler
-             class="org.ploys.ecle.handlers.PrefsHandler"
-             commandId="org.ploys.ecle.commands.prefs">
-       </handler>
     </extension>
     <extension
           point="org.eclipse.ui.bindings">

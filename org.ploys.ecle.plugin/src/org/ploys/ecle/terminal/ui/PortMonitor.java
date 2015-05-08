@@ -16,15 +16,16 @@ import org.ploys.ecle.ui.Icons;
 //TODO Switch view modes
 public class PortMonitor {
 	private StyledText eMonitor;
+	ToolItem fClearOnStart;
 
 	enum Action {
-		CLEAR, HOME, END, SAVE
+		CLEAR, HOME, END, SAVE, CLEARONSTART
 	}
 
 	void doMonitorAction(Action action, boolean state) {
 		switch (action) {
 		case CLEAR:
-			eMonitor.setText("");
+			clear();
 			break;
 		case HOME:
 			eMonitor.setTopIndex(0);
@@ -43,6 +44,14 @@ public class PortMonitor {
 
 	}
 
+	public boolean isClearOnStart() {
+		return fClearOnStart != null && fClearOnStart.getSelection();
+	}
+	
+	public void clear() {
+		eMonitor.setText("");
+	}
+
 	ModifyListener scrollListener = new ModifyListener() {
 		@Override
 		public void modifyText(ModifyEvent e) {
@@ -54,12 +63,15 @@ public class PortMonitor {
 		ToolBar tbMonitor = new ToolBar(parent, SWT.FLAT | SWT.RIGHT | SWT.VERTICAL);
 		tbMonitor.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, true, 1, 1));
 
-		ToolItem save = createButton(tbMonitor, Action.SAVE, "Save content to file...", "disk");
-		save.setEnabled(false);
-		
+		fClearOnStart = createButton(tbMonitor, Action.CLEARONSTART, "Clear on session start (port opened or RST twitched)", "terminal-clear");
+		createButton(tbMonitor, Action.CLEAR, "Clear", "eraser");
+
+		// ToolItem save = createButton(tbMonitor, Action.SAVE,
+		// "Save content to file...", "disk");
+		// save.setEnabled(false);
+
 		createButton(tbMonitor, Action.HOME, "Scroll to home", "atop");
 		ToolItem se = createButton(tbMonitor, Action.END, "Scroll to end", "abottom");
-		createButton(tbMonitor, Action.CLEAR, "Clear", "eraser");
 
 		eMonitor = new StyledText(parent, SWT.READ_ONLY | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI);
 		eMonitor.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
@@ -69,13 +81,20 @@ public class PortMonitor {
 		eMonitor.setTopMargin(3);
 		eMonitor.setLeftMargin(3);
 		eMonitor.setText("Embed plugin serial terminal\r\n");
-		
+
 		se.setSelection(true);
 		doMonitorAction(Action.END, true);
 	}
 
 	private ToolItem createButton(ToolBar tb, final Action action, String tip, String ico) {
-		int style = action == Action.END ? SWT.CHECK : SWT.NONE;
+		int style = SWT.NONE;
+
+		switch (action) {
+		case CLEARONSTART:
+		case END:
+			style = SWT.CHECK;
+			break;
+		}
 
 		final ToolItem tbItem = new ToolItem(tb, style);
 
@@ -87,12 +106,12 @@ public class PortMonitor {
 				doMonitorAction(action, tbItem.getSelection());
 			}
 		});
-		
+
 		return tbItem;
 	}
 
 	public void append(String data) {
 		eMonitor.append(data);
-		//eMonitor.append(" ");
+		// eMonitor.append(" ");
 	}
 }
