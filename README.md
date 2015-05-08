@@ -28,3 +28,6 @@ Ports list automatically updates on ports combo click, simple click on combo aft
 * Search monitor content
 * Capture content to file
 * Default connectors pinouts help
+ 
+#### Eclipse UI extensions
+* Add item in popup menu to send any file to terminal
