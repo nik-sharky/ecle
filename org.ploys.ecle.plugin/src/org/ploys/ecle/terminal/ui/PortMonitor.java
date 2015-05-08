@@ -63,7 +63,7 @@ public class PortMonitor {
 		ToolBar tbMonitor = new ToolBar(parent, SWT.FLAT | SWT.RIGHT | SWT.VERTICAL);
 		tbMonitor.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, true, 1, 1));
 
-		fClearOnStart = createButton(tbMonitor, Action.CLEARONSTART, "Clear on session start (port opened or RST twitched)", "terminal-clear");
+		fClearOnStart = createButton(tbMonitor, Action.CLEARONSTART, "Clear on session start (port opened or RTS pin twitched)", "terminal-clear");
 		createButton(tbMonitor, Action.CLEAR, "Clear", "eraser");
 
 		// ToolItem save = createButton(tbMonitor, Action.SAVE,

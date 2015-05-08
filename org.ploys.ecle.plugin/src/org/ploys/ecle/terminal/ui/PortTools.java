@@ -80,10 +80,10 @@ public class PortTools {
 		ToolBar tbPins = new ToolBar(parent, SWT.FLAT | SWT.RIGHT);
 
 		ftRts = new ToolItem(tbPins, SWT.NONE);
-		ftRts.setText("Twitch RTS");
+		ftRts.setImage(Icons.ico("power"));
+		//ftRts.setText("Twitch RTS");
 		ftRts.setToolTipText("Twitch RTS pin");
 		// fRts.setHotImage(Icons.state(State.ON));
-		// fRts.setImage(Icons.state(State.OFF));
 
 		new SpacerToolItem(tbPins, 10);
 
