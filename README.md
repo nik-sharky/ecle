@@ -1,4 +1,4 @@
-# Eclipse embed plugin
+# ECLE: Eclipse embedder tools
 ### Eclipse plugin for embedded things
 
 It is draft version now, currently work on build-flow automation for Sming and other ESP8266 stuff.
