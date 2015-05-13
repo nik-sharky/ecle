@@ -10,6 +10,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.ploys.ecle.Activator;
+import org.ploys.ecle.common.PrefKeys;
 
 /**
  * This class represents a preference page that is contributed to the

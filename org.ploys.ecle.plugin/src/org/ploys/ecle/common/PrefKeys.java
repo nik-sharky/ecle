@@ -1,4 +1,4 @@
-package org.ploys.ecle.prefs;
+package org.ploys.ecle.common;
 
 /**
  * Constant definitions for plug-in preferences

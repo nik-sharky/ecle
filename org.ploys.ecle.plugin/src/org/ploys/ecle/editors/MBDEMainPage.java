@@ -22,6 +22,10 @@ import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.wb.swt.ResourceManager;
 import org.ploys.ecle.Activator;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.jface.viewers.ComboViewer;
 
 public class MBDEMainPage extends FormPage {
 
@@ -68,10 +72,57 @@ public class MBDEMainPage extends FormPage {
 		composite.setLayout(new GridLayout(1, false));
 		
 		Section section = managedForm.getToolkit().createSection(composite, Section.TWISTIE | Section.TITLE_BAR);
-		section.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		section.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false, 1, 1));
 		managedForm.getToolkit().paintBordersFor(section);
 		section.setText("Build settings");
 		section.setExpanded(true);
+		
+		Composite composite_2 = new Composite(section, SWT.NONE);
+		managedForm.getToolkit().adapt(composite_2);
+		managedForm.getToolkit().paintBordersFor(composite_2);
+		section.setClient(composite_2);
+		composite_2.setLayout(new GridLayout(2, false));
+		
+		Label lblSpiSpeed = new Label(composite_2, SWT.NONE);
+		lblSpiSpeed.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		managedForm.getToolkit().adapt(lblSpiSpeed, true, true);
+		lblSpiSpeed.setText("SPI speed");
+		
+		Combo combo_1 = new Combo(composite_2, SWT.NONE);
+		combo_1.setItems(new String[] {"20MHz", "26.7MHz", "40MHz", "80MHz"});
+		combo_1.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
+		managedForm.getToolkit().adapt(combo_1);
+		managedForm.getToolkit().paintBordersFor(combo_1);
+		combo_1.select(2);
+		
+		Label lblSpiMode = new Label(composite_2, SWT.NONE);
+		lblSpiMode.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		managedForm.getToolkit().adapt(lblSpiMode, true, true);
+		lblSpiMode.setText("SPI mode");
+		
+		Combo combo_2 = new Combo(composite_2, SWT.NONE);
+		combo_2.setItems(new String[] {"QIO", "QOUT", "DIO", "DOUT"});
+		combo_2.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
+		managedForm.getToolkit().adapt(combo_2);
+		managedForm.getToolkit().paintBordersFor(combo_2);
+		combo_2.select(0);
+		
+		Label lblFlashCapacity = new Label(composite_2, SWT.NONE);
+		lblFlashCapacity.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
+		managedForm.getToolkit().adapt(lblFlashCapacity, true, true);
+		lblFlashCapacity.setText("Flash capacity");
+		
+		Combo combo = new Combo(composite_2, SWT.NONE);
+		combo.setItems(new String[] {"256KB", "512KB", "1024KB", "2048KB", "4096KB"});
+		combo.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
+		managedForm.getToolkit().adapt(combo);
+		managedForm.getToolkit().paintBordersFor(combo);
+		combo.select(1);
+		new Label(composite_2, SWT.NONE);
+		
+		Button btnBuild = new Button(composite_2, SWT.NONE);
+		managedForm.getToolkit().adapt(btnBuild, true, true);
+		btnBuild.setText("Build");
 		
 		Section section_1 = managedForm.getToolkit().createSection(composite, Section.TWISTIE | Section.TITLE_BAR);
 		section_1.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));

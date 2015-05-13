@@ -3,6 +3,7 @@ package org.ploys.ecle.prefs;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.ploys.ecle.Activator;
+import org.ploys.ecle.common.PrefKeys;
 
 /**
  * Class used to initialize default preference values.
@@ -17,7 +18,8 @@ public class PrefsInitializer extends AbstractPreferenceInitializer {
 	 */
 	public void initializeDefaultPreferences() {
 		IPreferenceStore store = Activator.getDefault().getPreferenceStore();
-		store.setDefault(PrefKeys.Path.SDK, "C:/Espressif/ESP8266_SDK");
+		
+		store.setDefault(PrefKeys.Path.SDK, espHome());
 		store.setDefault(PrefKeys.Path.COMPILER, "C:/Espressif/xtensa-lx106-elf");
 		store.setDefault(PrefKeys.Path.TOOLS, "C:/Espressif/utils");
 
@@ -31,4 +33,12 @@ public class PrefsInitializer extends AbstractPreferenceInitializer {
 		//store.setDefault(PrefKeys.P_STRING, "Default value");
 	}
 
+	private String espHome() {
+		//"C:/Espressif/ESP8266_SDK"
+		String val = System.getenv("ESP_HOME");
+		//String val = System.getenv("PHPRC");
+		if (val==null) 
+			val="";
+		return val;
+	}
 }
