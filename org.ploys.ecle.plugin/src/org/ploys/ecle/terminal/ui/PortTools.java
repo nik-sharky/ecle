@@ -23,6 +23,7 @@ import org.ploys.ecle.common.State;
 import org.ploys.ecle.ui.Icons;
 import org.ploys.ecle.ui.MapComboToolItem;
 import org.ploys.ecle.ui.SpacerToolItem;
+import org.ploys.ecle.ui.ToolCheck;
 import org.ploys.ecle.ui.UI;
 
 public class PortTools {
@@ -36,14 +37,14 @@ public class PortTools {
 	static int fcXONXOFF = SerialPort.FLOWCONTROL_XONXOFF_IN | SerialPort.FLOWCONTROL_XONXOFF_OUT;
 	static Integer[] fcs = { SerialPort.FLOWCONTROL_NONE, fcRTSCTS, fcXONXOFF };
 
-	private ToolItem aConnect;
+	private ToolCheck aConnect, fRts, fDtr;
 
 	private PortTools.Port cPort;
 	private PortTools.DataBits cDataBits;
 	private PortTools.StopBits cStopBits;
 	private PortTools.Parity cParity;
 	private PortTools.DataRate cSpeed;
-	private ToolItem fRts, fDtr, ftRts;
+	private ToolItem ftRts;
 
 	private PortToolsHandler handler;
 
@@ -57,7 +58,7 @@ public class PortTools {
 		gd_tbPort.minimumHeight = 24;
 		tbPort.setLayoutData(gd_tbPort);
 
-		aConnect = new ToolItem(tbPort, SWT.CHECK);
+		aConnect = new ToolCheck(tbPort);
 		aConnect.setHotImage(Icons.ico("plug-connect"));
 		aConnect.setImage(Icons.ico("plug-disconnect"));
 		aConnect.setText("Open");
@@ -81,13 +82,13 @@ public class PortTools {
 
 		ftRts = new ToolItem(tbPins, SWT.NONE);
 		ftRts.setImage(Icons.ico("power"));
-		//ftRts.setText("Twitch RTS");
+		// ftRts.setText("Twitch RTS");
 		ftRts.setToolTipText("Twitch RTS pin");
 		// fRts.setHotImage(Icons.state(State.ON));
 
 		new SpacerToolItem(tbPins, 10);
 
-		fRts = new ToolItem(tbPins, SWT.CHECK);
+		fRts = new ToolCheck(tbPins);
 		fRts.setHotImage(Icons.state(State.ON));
 		fRts.setImage(Icons.state(State.OFF));
 		fRts.setText("RTS");
@@ -95,7 +96,7 @@ public class PortTools {
 
 		new SpacerToolItem(tbPins, 5);
 
-		fDtr = new ToolItem(tbPins, SWT.CHECK);
+		fDtr = new ToolCheck(tbPins);
 		fDtr.setHotImage(Icons.state(State.ON));
 		fDtr.setImage(Icons.state(State.OFF));
 		fDtr.setText("DTR");
@@ -152,11 +153,9 @@ public class PortTools {
 					@Override
 					public void run() {
 						boolean state = fRts.getSelection();
-						ToolBar tb = fRts.getParent();
 
-						fRts.setSelection(!state);
-						fRts.notifyListeners(SWT.Selection, new Event());
-						tb.update();
+						fRts.select(!state);
+
 						synchronized (this) {
 							try {
 								wait(100);
@@ -164,10 +163,8 @@ public class PortTools {
 								e.printStackTrace();
 							}
 						}
-						
-						fRts.setSelection(state);
-						fRts.notifyListeners(SWT.Selection, new Event());
-						tb.update();
+
+						fRts.select(state);
 					}
 				});
 			}

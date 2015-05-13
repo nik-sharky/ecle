@@ -5,11 +5,13 @@ import jssc.SerialPortListExt;
 
 public class Serial {
 	public static String[] getPortNames() {
-//		String[] ports = SerialPortList.getPortNames();
 		String[] ports = SerialPortListExt.getPortNames();
+		//ports = null;
+		if (ports == null || ports.length == 0)
+			ports = new String[] { "* Click to refresh *" };
 		return ports;
 	}
-	
+
 	public enum Pin {
 		DTR, RTS, RXD, TXD, CTS, DCD, DSR, RNG, BREAK, ERROR;
 

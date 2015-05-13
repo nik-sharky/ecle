@@ -93,6 +93,12 @@
                 category="org.ploys.ecle.prefs"
                 class="org.ploys.ecle.prefs.PrefPageSming"
                 id="org.ploys.ecle.prefs.sming"/>
+        <page
+              category="org.ploys.ecle.prefs"
+              class="org.ploys.ecle.terminal.TerminalPrefs"
+              id="org.ploys.ecle.prefs.terminal"
+              name="Terminal">
+        </page>
     </extension>
     <extension
             point="org.eclipse.ui.perspectiveExtensions">
@@ -133,16 +139,25 @@
     <extension
             point="org.eclipse.ui.views">
         <category
-                name="Embedded tools"
-                id="org.ploys.ecle.tools">
+              id="org.ploys.ecle.tools"
+              name="ECLE tools"
+              parentCategory="org.ploys.ecle.tools">
         </category>
         <view
                 allowMultiple="false"
                 category="org.ploys.ecle.tools"
-                class="org.ploys.ecle.terminal.SerialTerminalView"
+                class="org.ploys.ecle.terminal.TerminalView"
                 icon="icons/full/eview16/terminal.png"
                 id="org.ploys.ecle.tools.SerialTerminalView"
                 name="ECLE terminal">
+        </view>
+        <view
+              category="org.ploys.ecle.tools"
+              class="org.ploys.ecle.builder.ProjectManagerView"
+              icon="icons/full/eview16/chip/chip.png"
+              id="Embed eclipse plugin.view1"
+              name="ECLE Project manager"
+              restorable="true">
         </view>
     </extension>
     <extension

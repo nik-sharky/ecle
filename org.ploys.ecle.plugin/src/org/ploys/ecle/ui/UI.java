@@ -22,4 +22,9 @@ public class UI {
 		IStatus status = new Status(IStatus.ERROR, Activator.PLUGIN_ID, message, e);
 		StatusManager.getManager().handle(new StatusAdapter(status), mode);
 	}
+
+	public static void infoDialog(int mode, String message) {
+		IStatus status = new Status(IStatus.INFO, Activator.PLUGIN_ID, message);
+		StatusManager.getManager().handle(new StatusAdapter(status), mode);		
+	}
 }

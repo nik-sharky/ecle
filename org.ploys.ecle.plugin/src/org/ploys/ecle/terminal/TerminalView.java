@@ -23,7 +23,7 @@ import org.ploys.ecle.terminal.ui.PortToolsHandler;
 import org.ploys.ecle.ui.Icons;
 import org.ploys.ecle.ui.UI;
 
-public class SerialTerminalView extends ViewPart {
+public class TerminalView extends ViewPart {
 	PortSend sender;
 	PortTools portTools;
 	PortMonitor monitor;
@@ -31,7 +31,7 @@ public class SerialTerminalView extends ViewPart {
 
 	private SerialPort serialPort;
 
-	public SerialTerminalView() {
+	public TerminalView() {
 	}
 
 	@PreDestroy
@@ -122,7 +122,7 @@ public class SerialTerminalView extends ViewPart {
 						portTools.setPortParams(serialPort);
 						updatePortStatus(true);
 					} catch (SerialPortException e) {
-						UI.errorDialog(StatusManager.SHOW, "Can't set params", e);
+						UI.errorDialog(StatusManager.BLOCK, "Can't set params", e);
 					}
 				}
 			}
@@ -131,6 +131,11 @@ public class SerialTerminalView extends ViewPart {
 			public boolean onConnect(boolean state) {
 				try {
 					if (state) {
+						if (portTools.getPort().startsWith("* ")) {
+							UI.infoDialog(StatusManager.BLOCK, "Select valid port please. Click on port selection combo-box to refresh ports list.");
+							return false;
+						}
+
 						portTools.disablePortSelect(true);
 						connect();
 						return true;
@@ -140,7 +145,7 @@ public class SerialTerminalView extends ViewPart {
 						return false;
 					}
 				} catch (Exception e) {
-					UI.errorDialog(StatusManager.SHOW, "Can't connect", e);
+					UI.errorDialog(StatusManager.BLOCK, "Can't connect", e);
 					portTools.disablePortSelect(false);
 					return false;
 				}
